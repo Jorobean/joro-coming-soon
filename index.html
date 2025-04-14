@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOROBEAN #1 - Slide into Comfort</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/",
+            "three/examples/": "https://unpkg.com/three@0.162.0/examples/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" aria-label="Home">
+                <img src="logo-heart.png" alt="JOROBEAN Logo" class="logo-icon">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="collection.html">Collection</a></li>
+            <li><a href="about.html">About</a></li>
+        </ul>
+        <div class="nav-icons">
+            <a href="index.html" class="nav-icon home-icon active" aria-label="Home">
+                <i class="fas fa-home"></i>
+            </a>
+            <a href="about.html" class="nav-icon" aria-label="About">
+                <i class="fas fa-info-circle"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>#1</h1>
+            <p class="tagline">Slide into Comfort</p>
+            <button class="pre-order-btn">Pre-Order Now</button>
+        </div>
+        <div class="hero-model-container">
+            <img src="shoe.jpg" alt="JOROBEAN #1 Shoe" class="hero-image">
+            <div id="model-viewer" class="model-viewer">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner"></i>
+                    <span>Loading 3D Model...</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-down">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Features</h2>
+            <div class="features-container">
+                <div class="feature animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3>100% 3D-Printed</h3>
+                    <p>Cutting-edge technology creates a shoe that's uniquely yours.</p>
+                </div>
+                <div class="feature animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-hand-sparkles"></i>
+                    </div>
+                    <h3>No Glue. No Stitching.</h3>
+                    <p>One seamless piece for unmatched durability and comfort.</p>
+                </div>
+                <div class="feature animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <h3>Printed On Demand</h3>
+                    <p>Zero waste. Made specifically for you when you order.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pre-Order Form -->
+    <section class="pre-order">
+        <div class="container animate-on-scroll">
+            <h2>Pre-Order Now</h2>
+            <p class="pre-order-text">Be among the first to experience JOROBEAN #1.</p>
+            <form id="pre-order-form">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Your email address" required>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <span>Submit Pre-Order</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; JOROBEAN <span id="year">2025</span></p>
+            </div>
+            <div class="footer-controls">
+                <div class="social-links">
+                    <a href="#" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                <button id="theme-toggle" aria-label="Toggle dark/light mode">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Page Transition Element -->
+    <div class="page-transition"></div>
+
+    <!-- About Popup Modal -->
+    <div class="about-popup" id="about-popup">
+        <div class="about-popup-content">
+            <button class="about-popup-close">&times;</button>
+            <h3>About JOROBEAN</h3>
+            <p>JOROBEAN is a revolutionary footwear brand at the intersection of comfort and technology. Founded with a vision to reimagine what shoes can be, we utilize cutting-edge 3D printing technology to create personalized, sustainable footwear.</p>
+            <p>Our flagship model, the #1 slide, represents the perfect balance of innovative design and unparalleled comfort. Each pair is digitally crafted and printed on demand, minimizing waste and maximizing customization possibilities.</p>
+            <p>At JOROBEAN, we believe that the future of footwear is sustainable, personalized, and technologically advanced. Join us on this journey as we step into a new era of comfort.</p>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html> 
