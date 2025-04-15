@@ -216,6 +216,15 @@ section {
     }
 }
 
+@media (max-width: 600px) {
+  /* Hide home and collection links and home icon on collection page */
+  body.collection-page .nav-links .home-link,
+  body.collection-page .nav-links .collection-link,
+  body.collection-page .nav-icons .home-icon {
+    display: none !important;
+  }
+}
+
 /* Hero Section */
 .hero {
   min-height: 100vh;
@@ -1064,4 +1073,62 @@ footer .container {
   background: #232323;
   color: #fff;
   outline: 2px solid #fff;
+}
+
+@media (max-width: 600px) {
+  /* Zoom out the 3D model container */
+  .model-viewer {
+    height: 68vw !important;
+    max-height: 54vh !important;
+    min-height: 320px !important;
+  }
+  .model-viewer canvas {
+    transform: scale(0.82);
+    transform-origin: center top;
+  }
+  /* Move the color picker down */
+  .color-picker-container {
+    bottom: 5vh !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Keep model-viewer container flush with screen edges and much taller */
+  .model-viewer-area,
+  .model-viewer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-radius: 0 !important;
+    height: 110vw !important;
+    max-height: 95vh !important;
+    min-height: 400px !important;
+  }
+  .model-viewer canvas {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 100% !important;
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+    object-fit: fill;
+    transform: none !important;
+  }
+  .color-picker-container {
+    position: static !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin: 2.2em auto 0 auto !important;
+    display: flex;
+    justify-content: center;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 1.5em;
+  }
 }
