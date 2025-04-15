@@ -322,10 +322,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- Shoe Color Picker ---
     const colorPicker = document.querySelector('.color-picker');
-    const colorBtnOrder = ['black', 'grey', 'coffee', 'green', 'blue', 'orange', 'red'];
+    const colorBtnOrder = ['grey', 'black', 'coffee', 'green', 'blue', 'orange', 'red'];
     const colorHexMap = {
-      'black': '#151515',
       'grey': '#555555',
+      'black': '#151515',
       'coffee': '#3a2414',
       'green': '#14341b',
       'blue': '#0066ff',
@@ -397,16 +397,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         // Set initial highlight
-        setActiveColorBtn('black');
+        setActiveColorBtn('grey');
     }
-    // Set default color on model load
+    // Set default color on model load (always grey, no random)
     function setDefaultColorOnLoad() {
         if (viewer && typeof viewer.setShoeColor === 'function') {
-            // Pick a random color from the available ones (excluding 'default' if not desired)
-            const colorChoices = ['black', 'grey', 'coffee', 'green', 'blue', 'orange', 'red'];
-            const randColor = colorChoices[Math.floor(Math.random() * colorChoices.length)];
-            viewer.setShoeColor(randColor);
-            setActiveColorBtn(randColor);
+            viewer.setShoeColor('grey');
+            setActiveColorBtn('grey');
         }
     }
     // Hook into model load success
@@ -455,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       // Set initial gooey position
-      updateGooeySlider('black');
+      updateGooeySlider('grey');
     }
 
     // On resize, keep gooey slider in sync
