@@ -19,13 +19,13 @@
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="collection.html" class="active">Collection</a></li>
-            <li><a href="about.html">About</a></li>
+            <li><a href="#" class="about-link">About</a></li>
         </ul>
         <div class="nav-icons">
             <a href="index.html" class="nav-icon home-icon" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
-            <a href="about.html" class="nav-icon" aria-label="About">
+            <a href="#" class="nav-icon about-icon" aria-label="About">
                 <i class="fas fa-info-circle"></i>
             </a>
         </div>
@@ -102,9 +102,6 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; JOROBEAN <span id="year">2025</span></p>
-            </div>
             <div class="footer-controls">
                 <div class="social-links">
                     <a href="#" aria-label="Instagram">
@@ -116,16 +113,19 @@
                     <i class="fas fa-sun"></i>
                 </button>
             </div>
+            <div class="footer-bottom">
+                <p>&copy; JOROBEAN <span id="year">2025</span></p>
+            </div>
         </div>
     </footer>
 
     <!-- Page Transition Element -->
     <div class="page-transition"></div>
 
-    <!-- About Popup Modal -->
-    <div class="about-popup" id="about-popup">
-        <div class="about-popup-content">
-            <button class="about-popup-close">&times;</button>
+    <!-- About Modal Bottom Sheet -->
+    <div class="about-bottom-sheet" id="about-bottom-sheet">
+        <div class="about-bottom-sheet-content">
+            <button class="about-bottom-sheet-close" id="about-bottom-sheet-close" aria-label="Close About">&times;</button>
             <h3>About JOROBEAN</h3>
             <p>JOROBEAN is a revolutionary footwear brand at the intersection of comfort and technology. Founded with a vision to reimagine what shoes can be, we utilize cutting-edge 3D printing technology to create personalized, sustainable footwear.</p>
             <p>Our flagship model, the #1 slide, represents the perfect balance of innovative design and unparalleled comfort. Each pair is digitally crafted and printed on demand, minimizing waste and maximizing customization possibilities.</p>
@@ -133,6 +133,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
-</html> 
+</html>

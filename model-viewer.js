@@ -6,384 +6,256 @@ export class ModelViewer {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x111111); // Dark background to see model better
+        // Set background color to the user's specified dark grey
+        this.scene.background = new THREE.Color(0x111111); // #111111
+
+        // Camera default: side/front view, not top-down
         this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
-        
-        // Detect if mobile
+        this.camera.position.set(0, 1.25, 7.8); // Move camera further back for more zoom out
+        this.camera.lookAt(0, 0.38, 0); // Look at shoe center
         this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        // Set up renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.isMobile ? 2 : 3));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        
-        // Fix for newer Three.js versions
-        if (this.renderer.outputEncoding !== undefined) {
-            this.renderer.outputEncoding = THREE.sRGBEncoding;
-        } else if (this.renderer.outputColorSpace !== undefined) {
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.1;
+
+        if (this.renderer.outputColorSpace !== undefined) {
             this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         }
+
         this.container.appendChild(this.renderer.domElement);
-        
-        // Set up camera position - adjust for mobile
+
         if (this.isMobile) {
-            this.camera.position.set(0, 1.5, 6); // Slightly higher FOV for mobile
+            this.camera.position.set(0, 1.5, 6);
         } else {
-            this.camera.position.set(0, 2, 5.25); // Desktop position
+            // Camera perspective to match hero image (side/front slightly above)
+            // this.camera.position.set(0, 2.2, 5.25); // Slightly higher Y for above angle
+            // this.camera.lookAt(0, 1, 0); // Focus slightly above ground for natural shadow
+            // this.initialCameraPosition = this.camera.position.clone();
         }
-        this.camera.lookAt(0, 1, 0);
-        
-        // Store initial camera position for maintaining zoom on resize
-        this.initialCameraPosition = this.camera.position.clone();
-        this.initialLookAt = new THREE.Vector3(0, 1, 0);
-        
-        // LIGHTING SETUP: Create even, comprehensive lighting from all directions
-        
-        // Strong universal ambient light for base illumination everywhere
-        const ambientLight = new THREE.AmbientLight(0xffffff, 6.0);
-        this.scene.add(ambientLight);
-        
-        // Create a sphere of lights around the model with more intensity
-        const lightPositions = [
-            [5, 5, 5],    // top-front-right
-            [-5, 5, 5],   // top-front-left
-            [5, 5, -5],   // top-back-right
-            [-5, 5, -5],  // top-back-left
-            [5, -3, 5],   // bottom-front-right
-            [-5, -3, 5],  // bottom-front-left
-            [5, -3, -5],  // bottom-back-right
-            [-5, -3, -5], // bottom-back-left
-            [0, 8, 0],    // direct top
-            [0, -5, 0],   // direct bottom
-            [0, 0, -8],   // direct back
-            [0, 0, 8],    // direct front
-            [8, 0, 0],    // direct right
-            [-8, 0, 0]    // direct left
-        ];
-        
-        // Create lights at each position with higher intensity
-        for (const pos of lightPositions) {
-            const light = new THREE.PointLight(0xffffff, 3.0);
-            light.position.set(pos[0], pos[1], pos[2]);
-            this.scene.add(light);
-        }
-        
-        // Add hemisphere light for more natural lighting from sky/ground
-        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 3.0);
-        this.scene.add(hemisphereLight);
-        
-        // Add a directional main light for shadows and definition
-        const mainLight = new THREE.DirectionalLight(0xffffff, 4.0);
-        mainLight.position.set(5, 10, 7);
-        mainLight.castShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        this.scene.add(mainLight);
-        
-        // Add controls
+        // this.camera.lookAt(0, 1, 0);
+        // this.initialCameraPosition = this.camera.position.clone();
+
+        // Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 1.2); // Brighter ambient
+        this.scene.add(ambient);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x222222, 1.0); // Universal soft light
+        hemiLight.position.set(0, 10, 0);
+        this.scene.add(hemiLight);
+
+        const directional = new THREE.DirectionalLight(0xffffff, 2.5);
+        directional.position.set(5, 10, 7);
+        directional.castShadow = true;
+        directional.shadow.mapSize.set(2048, 2048);
+        directional.shadow.bias = -0.0005;
+        this.scene.add(directional);
+
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        backLight.position.set(0, -4, -6);
+        this.scene.add(backLight);
+
+        const rectLight = new THREE.RectAreaLight(0xffffff, 2.5, 6, 6);
+        rectLight.position.set(0, 5, 5);
+        rectLight.lookAt(0, 0, 0);
+        this.scene.add(rectLight);
+
+        const fillLight = new THREE.PointLight(0xffffff, 0.7);
+        fillLight.position.set(-4, 3, -4);
+        this.scene.add(fillLight);
+
+        // Add infinite grid and floor
+        const gridSize = 2000;
+        const gridDivisions = 300; // Ultra dense grid
+        this.gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x888888, 0x222222);
+        this.gridHelper.material.opacity = 0.18;
+        this.gridHelper.material.transparent = true;
+        this.gridHelper.position.y = 0.01; // Slightly above floor to avoid z-fighting
+        this.scene.add(this.gridHelper);
+
+        // Infinite floor plane with fade
+        const floorSize = 2000;
+        const floorGeometry = new THREE.PlaneGeometry(floorSize, floorSize, 1, 1);
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            color: 0x181818,
+            roughness: 1.0,
+            metalness: 0.0,
+            transparent: true,
+            opacity: 0.98
+        });
+        this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        this.floor.rotation.x = -Math.PI / 2;
+        this.floor.receiveShadow = true;
+        this.scene.add(this.floor);
+
+        // Add fog for infinite fade effect
+        this.scene.fog = new THREE.Fog(0x111111, 16, 120);
+
+        // Controls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.1; // Consistent dampening for both mobile and desktop
-        this.controls.minDistance = 2;
-        this.controls.maxDistance = 20;
-        this.controls.enableZoom = false; // Disable zooming
-        this.controls.enablePan = false; // Disable panning/dragging for all devices
-        
-        // Mobile-specific control adjustments
-        if (this.isMobile) {
-            this.controls.rotateSpeed = 1.5; // Faster rotation on mobile
-        }
-        
-        // Object to store the loaded model
-        this.model = null;
-        
-        // Handle window resize
+        this.controls.dampingFactor = 0.1;
+        this.controls.enableZoom = false;
+        this.controls.enablePan = false;
+        this.controls.rotateSpeed = this.isMobile ? 1.5 : 1.0;
+
         window.addEventListener('resize', this.onWindowResize.bind(this));
-        
-        // Add a visible axes helper (will be hidden once the model loads)
-        const axesHelper = new THREE.AxesHelper(5);
-        this.scene.add(axesHelper);
-        this.axesHelper = axesHelper; // Store reference to hide later
-        
-        // Add a grid instead of a ground plane
-        const gridHelper = new THREE.GridHelper(20, 20, 0x555555, 0x333333);
-        gridHelper.position.y = -1; // Position grid below the model
-        this.scene.add(gridHelper);
-        this.gridHelper = gridHelper; // Store reference to hide/show as needed
-        
-        // Add a default fallback cube just to verify rendering works
+
+        this.model = null;
+        this.autoRotate = false;
+
         this.addFallbackObject();
-        
-        // Start animation loop
-        this.animate();
-    }
-    
-    // Add a colored cube as a fallback object to ensure rendering works
-    addFallbackObject() {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0xff5533,
-            roughness: 0.7,
-            metalness: 0.3
-        });
-        this.fallbackCube = new THREE.Mesh(geometry, material);
-        this.fallbackCube.position.set(0, 0, 0);
-        this.fallbackCube.castShadow = true;
-        this.fallbackCube.receiveShadow = true;
-        this.scene.add(this.fallbackCube);
-        
-        // Add a sphere too for reference
-        const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-        const sphereMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x3355ff,
-            roughness: 0.7,
-            metalness: 0.3
-        });
-        this.fallbackSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        this.fallbackSphere.position.set(2, 0, 0);
-        this.fallbackSphere.castShadow = true;
-        this.fallbackSphere.receiveShadow = true;
-        this.scene.add(this.fallbackSphere);
-    }
-    
-    loadModel(modelPath) {
-        return new Promise((resolve, reject) => {
-            const loader = new GLTFLoader();
-            
-            loader.load(
-                modelPath,
-                (gltf) => {
-                    try {
-                        console.log('Model loaded successfully', gltf);
-                        
-                        // Remove fallback objects
-                        if (this.fallbackCube) {
-                            this.scene.remove(this.fallbackCube);
-                            this.scene.remove(this.fallbackSphere);
-                        }
-                        
-                        // Remove any previously loaded model
-                        if (this.model) {
-                            this.scene.remove(this.model);
-                        }
-                        
-                        this.model = gltf.scene;
-                        
-                        // Check if there are any meshes in the scene
-                        let hasMeshes = false;
-                        const meshList = [];
-                        
-                        // Process all meshes in the model
-                        this.model.traverse((node) => {
-                            if (node.isMesh) {
-                                hasMeshes = true;
-                                meshList.push(node.name || "unnamed mesh");
-                                console.log('Found mesh:', node.name);
-                                node.castShadow = true;
-                                node.receiveShadow = true;
-                                
-                                // Log geometry details
-                                if (node.geometry) {
-                                    console.log('Geometry vertices:', node.geometry.attributes.position.count);
-                                }
-                                
-                                // Ensure material is visible
-                                if (node.material) {
-                                    if (Array.isArray(node.material)) {
-                                        node.material.forEach(mat => {
-                                            console.log('Material:', mat);
-                                            mat.side = THREE.DoubleSide;
-                                            mat.transparent = false;
-                                            mat.opacity = 1;
-                                            
-                                            // Apply material settings for smooth finish like the image
-                                            mat.roughness = 0.9; // Higher roughness for matte finish
-                                            mat.metalness = 0.0; // No metallic properties for clay look
-                                            mat.flatShading = false; // Smooth shading between polygons
-                                            
-                                            // Use terracotta clay color
-                                            mat.color = new THREE.Color(0x92604f);
-                                            
-                                            // Minimal emissive for better visibility
-                                            if (mat.emissive) {
-                                                mat.emissive = new THREE.Color(0x222222);
-                                                mat.emissiveIntensity = 0.05; // Very subtle self-illumination
-                                            }
-                                        });
-                                    } else {
-                                        console.log('Material:', node.material);
-                                        node.material.side = THREE.DoubleSide;
-                                        node.material.transparent = false;
-                                        node.material.opacity = 1;
-                                        
-                                        // Apply material settings for smooth finish like the image
-                                        node.material.roughness = 0.9; // Higher roughness for matte finish
-                                        node.material.metalness = 0.0; // No metallic properties for clay look
-                                        node.material.flatShading = false; // Smooth shading between polygons
-                                        
-                                        // Use terracotta clay color
-                                        node.material.color = new THREE.Color(0x92604f);
-                                        
-                                        // Minimal emissive for better visibility
-                                        if (node.material.emissive) {
-                                            node.material.emissive = new THREE.Color(0x222222);
-                                            node.material.emissiveIntensity = 0.05; // Very subtle self-illumination
-                                        }
-                                    }
-                                } else {
-                                    // Create a new material if none exists
-                                    node.material = new THREE.MeshStandardMaterial({
-                                        color: 0x92604f, // Terracotta clay color
-                                        roughness: 0.9,
-                                        metalness: 0.0,
-                                        flatShading: false,
-                                        side: THREE.DoubleSide,
-                                        emissive: 0x222222,
-                                        emissiveIntensity: 0.05
-                                    });
-                                }
-                            }
-                        });
-                        
-                        if (!hasMeshes) {
-                            console.error('No meshes found in the model! Using fallback objects instead.');
-                            this.addFallbackObject();
-                            resolve();
-                            return;
-                        }
-                        
-                        console.log('Meshes found in model:', meshList.join(', '));
-                        
-                        // Center the model exactly on the axes
-                        const box = new THREE.Box3().setFromObject(this.model);
-                        if (box.isEmpty()) {
-                            console.error('Model bounding box is empty! Using fallback position.');
-                            this.model.position.set(0, 0, 0);
-                        } else {
-                            const center = box.getCenter(new THREE.Vector3());
-                            
-                            // Store the original position
-                            const originalPosition = this.model.position.clone();
-                            
-                            // Create a new parent object to hold the model
-                            const modelParent = new THREE.Object3D();
-                            this.scene.add(modelParent);
-                            
-                            // First, add the model to the parent
-                            modelParent.add(this.model);
-                            
-                            // Then, position the model within the parent so its center is at the parent's origin
-                            this.model.position.copy(originalPosition).sub(center);
-                            
-                            // Now when the parent rotates, the model will rotate around its visual center
-                            this.model = modelParent;
-                            
-                            // Scale the model to fit the view
-                            const size = box.getSize(new THREE.Vector3());
-                            console.log('Model size:', size);
-                            
-                            // ALWAYS scale up the model significantly since Blender exports tend to be small
-                            const maxDim = Math.max(size.x, size.y, size.z);
-                            console.log('Original max dimension:', maxDim);
-                            
-                            // Apply a smaller scale to make it appropriately sized
-                            const scale = 4.75 / maxDim; // Reduced by 5% from 5.0
-                            console.log('Using scale:', scale);
-                            this.model.scale.multiplyScalar(scale);
-                        }
-                        
-                        // Position the model exactly at the origin
-                        this.model.position.set(0, 1, 0); // Position 1 unit above the grid
-                        
-                        // Hide the axes helper
-                        if (this.axesHelper) {
-                            this.axesHelper.visible = false;
-                        }
-                        
-                        // Disable automatic rotation
-                        this.autoRotate = false;
-                        
-                        this.scene.add(this.model);
-                        resolve();
-                    } catch (error) {
-                        console.error('Error processing model:', error);
-                        // Use fallback objects
-                        this.addFallbackObject();
-                        reject(error);
-                    }
-                },
-                (xhr) => {
-                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-                },
-                (error) => {
-                    console.error('Error loading model:', error);
-                    // Use fallback objects
-                    this.addFallbackObject();
-                    reject(error);
-                }
-            );
-        });
-    }
-    
-    onWindowResize() {
-        // Maintain aspect ratio without changing the field of view
-        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
-        this.camera.updateProjectionMatrix();
-        
-        // Reset renderer size
-        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
-        
-        // Reset camera position to maintain the same view distance
-        if (this.initialCameraPosition) {
-            const distance = this.initialCameraPosition.z;
-            const fov = this.camera.fov * (Math.PI / 180);
-            const newHeight = 2 * Math.tan(fov / 2) * distance;
-            const ratio = this.container.clientHeight / newHeight;
-            
-            // Keep the model in view by adjusting the camera position based on container size
-            if (this.container.clientWidth < 768 && !this.isMobile) {
-                // When desktop window gets small, adjust camera to ensure model visibility
-                this.camera.position.copy(this.initialCameraPosition);
-                this.camera.position.z += 1; // Step back a bit to keep model in view
-            } else {
-                // Reset to initial positions on larger screens or for mobile
-                this.camera.position.copy(this.initialCameraPosition);
-            }
-        }
-    }
-    
-    animate() {
-        requestAnimationFrame(this.animate.bind(this));
-        
-        // Rotate the fallback cube if it exists
-        if (this.fallbackCube) {
-            this.fallbackCube.rotation.y += 0.01;
-            this.fallbackCube.rotation.x += 0.005;
-        }
-        
-        // Rotate the model slowly if autoRotate is enabled
-        if (this.model && this.autoRotate) {
-            this.model.rotation.y += 0.01;
-        }
-        
-        // Hide grid when viewing from below
-        if (this.gridHelper && this.camera) {
-            // Get the camera's vertical angle
-            const cameraDirection = new THREE.Vector3();
-            this.camera.getWorldDirection(cameraDirection);
-            
-            // If looking down (positive y direction), hide the grid
-            // This reveals the underside of the shoe
-            if (cameraDirection.y > 0.1) {
+
+        // In the animation/render loop, hide the grid if camera is below the floor
+        const animate = () => {
+            requestAnimationFrame(animate);
+            if (this.controls) this.controls.update();
+            // Hide grid when camera is below the floor (y=0)
+            if (this.camera.position.y < 0.01) {
                 this.gridHelper.visible = false;
             } else {
                 this.gridHelper.visible = true;
             }
-        }
-        
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+            if (this.model && this.autoRotate) this.model.rotation.y += 0.01;
+            this.renderer.render(this.scene, this.camera);
+        };
+        animate();
     }
-} 
+
+    addFallbackObject() {
+        // Do nothing: remove fallback cube entirely
+    }
+
+    loadModel(modelPath) {
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader();
+
+            loader.load(modelPath, (gltf) => {
+                try {
+                    if (this.fallbackCube) this.scene.remove(this.fallbackCube);
+                    if (this.model) this.scene.remove(this.model);
+
+                    this.model = gltf.scene;
+                    this.model.traverse((node) => {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+
+                            const mat = node.material;
+                            if (mat) {
+                                mat.side = THREE.DoubleSide;
+                                mat.flatShading = false;
+                                mat.transparent = false;
+                                mat.opacity = 1;
+                                mat.roughness = 0.5;
+                                mat.metalness = 0.2;
+                                mat.color = new THREE.Color(0xd6a187); // Soft terracotta
+                                if (mat.emissive) {
+                                    mat.emissive = new THREE.Color(0x222222);
+                                    mat.emissiveIntensity = 0.05;
+                                }
+                            }
+                        }
+                    });
+
+                    // Compute bounding box for a single shoe to determine width
+                    const singleBox = new THREE.Box3().setFromObject(this.model);
+                    const shoeWidth = singleBox.max.x - singleBox.min.x;
+                    const gap = 0.1 * shoeWidth; // Small gap between shoes
+
+                    // Create left and right shoes
+                    const leftShoe = this.model.clone(true);
+                    const rightShoe = this.model.clone(true);
+
+                    // Mirror the right shoe across X axis
+                    rightShoe.scale.x *= -1;
+
+                    // Place shoes as close as possible, visually touching or overlapping more
+                    const tinyGap = -0.18 * shoeWidth; // Shoes are nearly merged
+                    leftShoe.position.x = -0.5 * shoeWidth - 0.5 * tinyGap;
+                    rightShoe.position.x = 0.5 * shoeWidth + 0.5 * tinyGap;
+                    leftShoe.position.z = 0;
+                    rightShoe.position.z = 0;
+
+                    // Rotate the right shoe 90 degrees and the left shoe -90 degrees
+                    rightShoe.rotation.y = THREE.MathUtils.degToRad(90);
+                    leftShoe.rotation.y = THREE.MathUtils.degToRad(-90);
+
+                    // Group them together
+                    const pairGroup = new THREE.Group();
+                    pairGroup.add(leftShoe);
+                    pairGroup.add(rightShoe);
+
+                    // Center the group vertically as before, but move it closer to the floor
+                    const pairBox = new THREE.Box3().setFromObject(pairGroup);
+                    const minY = pairBox.min.y;
+                    const size = pairBox.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 5 / maxDim;
+                    pairGroup.scale.setScalar(scale);
+                    // Raise the shoes slightly off the floor for a floating effect
+                    pairGroup.position.y = -minY * scale + 0.07;
+
+                    // Move the shoes group further back so the center line crosses at or in front of the midpoint
+                    pairGroup.position.z = -1.2; // Move further back
+
+                    this.model = pairGroup;
+                    this.scene.add(this.model);
+                    resolve();
+                } catch (e) {
+                    this.addFallbackObject();
+                    reject(e);
+                }
+            }, undefined, (err) => {
+                console.error('Load error', err);
+                this.addFallbackObject();
+                reject(err);
+            });
+        });
+    }
+
+    setShoeColor(colorName) {
+        // Preset color values
+        const colors = {
+            'coffee': 0x3a2414, // Much darker coffee brown
+            'green': 0x14341b, // Much darker green
+            'grey': 0x555555, // Darker grey
+            'black': 0x151515, // Much darker black
+            'orange': 0xff4d00, // Electric Orange
+            'blue': 0x0066ff,  // Royal Blue
+            'red': 0x8a1010   // Darker red
+        };
+        const hex = colors[colorName] || colors['coffee'];
+        if (!this.model) return;
+        this.model.traverse((node) => {
+            if (node.isMesh && node.material) {
+                node.material.color = new THREE.Color(hex);
+                node.material.needsUpdate = true;
+                // Boost red's emissive for vibrancy
+                if (colorName === 'red' && node.material.emissive) {
+                    node.material.emissive = new THREE.Color(0x660000);
+                    node.material.emissiveIntensity = 0.18;
+                } else if (colorName === 'black' && node.material) {
+                    node.material.roughness = 0.47;
+                    if (node.material.emissive) {
+                        node.material.emissive = new THREE.Color(0x232323);
+                        node.material.emissiveIntensity = 0.14;
+                    }
+                } else if (node.material.emissive) {
+                    node.material.emissive = new THREE.Color(0x222222);
+                    node.material.emissiveIntensity = 0.05;
+                }
+            }
+        });
+    }
+
+    onWindowResize() {
+        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    }
+}
