@@ -30,8 +30,8 @@ export class ModelViewer {
         this.container.appendChild(this.renderer.domElement);
 
         if (this.isMobile) {
-            // Zoom out to z=14 on mobile
-            this.camera.position.set(0, 1.5, 14);
+            // Zoom out to z=16 on mobile
+            this.camera.position.set(0, 1.5, 16);
         } else {
             // Camera perspective to match hero image (side/front slightly above)
             // this.camera.position.set(0, 2.2, 5.25); // Slightly higher Y for above angle
