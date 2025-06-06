@@ -19,13 +19,13 @@
         <ul class="nav-links">
             <li><a href="index.html" class="home-link">Home</a></li>
             <li><a href="collection.html" class="collection-link active">Collection</a></li>
-            <li><a href="#" class="about-link">About</a></li>
+            <li><a href="#" class="about-link" id="about-link">About</a></li>
         </ul>
         <div class="nav-icons">
             <a href="index.html" class="nav-icon home-icon" aria-label="Home">
                 <i class="fas fa-home"></i>
             </a>
-            <a href="#" class="nav-icon about-icon" aria-label="About">
+            <a href="#" class="nav-icon about-icon" aria-label="About" id="about-icon">
                 <i class="fas fa-info-circle"></i>
             </a>
         </div>
@@ -134,5 +134,25 @@
     </div>
 
     <script type="module" src="script.js"></script>
+    <script>
+        // Modal open/close logic
+        const aboutLink = document.getElementById('about-link');
+        const aboutIcon = document.getElementById('about-icon');
+        const aboutSheet = document.getElementById('about-bottom-sheet');
+        const closeBtn = document.getElementById('about-bottom-sheet-close');
+
+        function openAboutSheet(e) {
+            e.preventDefault();
+            aboutSheet.classList.add('open');
+        }
+
+        function closeAboutSheet() {
+            aboutSheet.classList.remove('open');
+        }
+
+        aboutLink.addEventListener('click', openAboutSheet);
+        aboutIcon.addEventListener('click', openAboutSheet);
+        closeBtn.addEventListener('click', closeAboutSheet);
+    </script>
 </body>
 </html>
