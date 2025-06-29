@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coming Soon</title>
   <link rel="icon" href="favicon.png" type="image/png" />
   <style>
@@ -12,16 +12,16 @@
 
     body {
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
       background-color: #e1e1e1;
       color: #0b0b0b;
-      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       text-align: center;
+      position: relative;
     }
 
     img.logo {
@@ -30,43 +30,213 @@
     }
 
     h1 {
-      margin-top: 20px;
       font-size: 2em;
-      letter-spacing: 2px;
-    }
-
-    a.instagram {
       margin-top: 20px;
-      display: inline-block;
     }
 
-    a.instagram img {
+    #form-container {
+      margin-top: 40px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    input {
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 260px;
+      max-width: 90vw;
+      text-align: center;
+      transition: all 0.3s ease;
+      background-color: #ffffff;
+      color: #0b0b0b;
+    }
+
+    #name,
+    #email {
+      display: none;
+      opacity: 0;
+    }
+
+    #starterInput {
+      text-align: center;
+    }
+
+    form.expanded #starterInput {
+      display: none;
+    }
+
+    form.expanded #name,
+    form.expanded #email {
+      display: block;
+      opacity: 1;
+      text-align: left;
+    }
+
+    button {
+      background: black;
+      color: white;
+      font-size: 1rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      display: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, color 0.3s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    form.expanded button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spinner {
+      border: 2px solid white;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .instagram {
+      position: absolute;
+      bottom: 20px;
+    }
+
+    .instagram img {
       width: 32px;
-      height: 32px;
       transition: transform 0.3s ease;
     }
 
-    a.instagram:hover img {
+    .instagram:hover img {
       transform: scale(1.1);
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5em;
-      }
-
-      a.instagram img {
-        width: 28px;
-        height: 28px;
-      }
     }
   </style>
 </head>
 <body>
-  <img class="logo" src="logo.png" alt="Jorobean Logo" />
+
+  <img class="logo" src="logo.png" alt="Logo" />
   <h1>Coming Soon</h1>
+
+  <div id="form-container">
+    <form id="notifyForm">
+      <input type="text" id="starterInput" placeholder="" autocomplete="off" />
+      <input type="text" id="name" name="name" placeholder="Full Name" autocomplete="name" />
+      <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required />
+      <button type="submit" id="submitBtn">
+        <span class="btn-text">Submit</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </form>
+  </div>
+
   <a class="instagram" href="https://instagram.com/jorobean" target="_blank" rel="noopener noreferrer">
     <img src="instagram-icon.svg" alt="Instagram" />
   </a>
+
+  <script>
+    const form = document.getElementById("notifyForm");
+    const starterInput = document.getElementById("starterInput");
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const button = document.getElementById("submitBtn");
+    const btnText = button.querySelector(".btn-text");
+    const spinner = document.getElementById("spinner");
+
+    const phrase = "Stay Updated";
+    let charIndex = 0, isDeleting = false;
+
+    function type() {
+      if (!form.classList.contains("expanded")) {
+        if (!isDeleting) {
+          starterInput.value = phrase.substring(0, charIndex++);
+          if (charIndex > phrase.length) {
+            isDeleting = true;
+            setTimeout(type, 4000);
+            return;
+          }
+        } else {
+          starterInput.value = phrase.substring(0, charIndex--);
+          if (charIndex === 0) {
+            isDeleting = false;
+          }
+        }
+        setTimeout(type, 100);
+      }
+    }
+
+    type();
+
+    starterInput.addEventListener("focus", () => {
+      form.classList.add("expanded");
+      starterInput.value = "";
+      nameInput.focus();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!nameInput.value.trim() || !emailInput.value.trim()) {
+        alert("Please enter both name and email.");
+        return;
+      }
+
+      btnText.style.display = "none";
+      spinner.style.display = "inline-block";
+      button.disabled = true;
+
+      const formData = new FormData();
+      formData.append("name", nameInput.value.trim());
+      formData.append("email", emailInput.value.trim());
+
+      try {
+        const res = await fetch("https://formspree.io/f/meoabwgg", {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body: formData
+        });
+
+        if (!res.ok) throw new Error("Submit failed");
+
+        spinner.style.display = "none";
+        btnText.textContent = "Thank You";
+        btnText.style.display = "inline-block";
+
+        form.reset();
+        form.classList.remove("expanded");
+
+        setTimeout(() => {
+          btnText.textContent = "Submit";
+          button.disabled = false;
+        }, 30000); // 30 seconds
+
+      } catch (err) {
+        spinner.style.display = "none";
+        btnText.style.display = "inline-block";
+        btnText.textContent = "Submit";
+        button.disabled = false;
+        alert("Something went wrong. Try again later.");
+        console.error(err);
+      }
+    });
+  </script>
+
 </body>
 </html>
