@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coming Soon</title>
   <link rel="icon" href="favicon.png" type="image/png" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="Jorobean — Coming Soon">
+  <meta property="og:description" content="Wear The Love. Get ready for the Jorobean launch.">
+  <meta property="og:image" content="https://jorobean.com/logo.png">
+  <meta property="og:url" content="https://jorobean.com">
+  <meta property="og:type" content="website">
+
   <style>
     * {
       box-sizing: border-box;
@@ -129,6 +137,13 @@
     .instagram:hover img {
       transform: scale(1.1);
     }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.8rem;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -152,7 +167,11 @@
     <img src="instagram-icon.svg" alt="Instagram" />
   </a>
 
+  <footer id="footer"></footer>
+
   <script>
+    document.getElementById("footer").textContent =
+    `© ${new Date().getFullYear()} Jorobean — All rights reserved.`;
     const form = document.getElementById("notifyForm");
     const starterInput = document.getElementById("starterInput");
     const nameInput = document.getElementById("name");
@@ -226,7 +245,7 @@
         setTimeout(() => {
           btnText.textContent = "Submit";
           button.disabled = false;
-        }, 30000); // 30 seconds
+        }, 30000);
 
       } catch (err) {
         spinner.style.display = "none";
