@@ -1,293 +1,614 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Coming Soon</title>
-  <link rel="icon" href="favicon.png" type="image/png" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultimate Jelly Pill Button/Input</title>
+<style>
+  /* Reset */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    user-select: none;
+  }
 
-  <!-- Open Graph / Social Sharing -->
-  <meta property="og:title" content="Jorobean — Coming Soon">
-  <meta property="og:description" content="Wear The Love. Get ready for the Jorobean launch.">
-  <meta property="og:image" content="https://jorobean.com/logo.png">
-  <meta property="og:url" content="https://jorobean.com">
-  <meta property="og:type" content="website">
+  /* Container */
+  .pill-container {
+    position: relative;
+    width: 280px;
+    perspective: 800px; /* for 3D tilt */
+  }
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+  /* Jelly pill base style */
+  .pill-button, .pill-input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 12px 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    color: black;
+    background: #fff;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s cubic-bezier(0.25, 1.5, 0.5, 1);
+    user-select: none;
+  }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #e1e1e1;
-      color: #0b0b0b;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      position: relative;
-      overflow-x: hidden;
-    }
+  /* Pill button */
+  .pill-button {
+    overflow: hidden;
+    z-index: 2;
+  }
 
-    img.logo {
-      max-width: 80%;
-      height: auto;
-      opacity: 0;
-      animation: fadeIn 1s ease forwards;
-      animation-delay: 0.3s;
-    }
+  .pill-button span {
+    position: relative;
+    z-index: 2;
+  }
 
-    h1 {
-      font-size: 2em;
-      margin-top: 20px;
-      opacity: 0;
-      animation: fadeIn 1s ease forwards;
-      animation-delay: 0.6s;
-    }
+  /* Wave radial background overlay */
+  .pill-button::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 200%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(180, 115, 90, 0.4) 0%, rgba(180, 115, 90, 0.2) 40%, transparent 70%);
+    z-index: 1;
+    pointer-events: none;
+  }
 
-    #form-container {
-      margin-top: 40px;
-      opacity: 0;
-      animation: fadeIn 1s ease forwards;
-      animation-delay: 0.9s;
-    }
+  /* Hover wave animation */
+  .pill-button:hover {
+    background-color: #B4735A; /* Mocha Mousse Pantone 2025 */
+    color: white;
+  }
+  .pill-button:hover::after {
+    animation: jellywave 2s ease-in-out infinite;
+  }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
+  /* Jelly pop on mount & focus */
+  @keyframes jellyPop {
+    0% {transform: scale(1);}
+    50% {transform: scale(1.1) skewX(-1deg);}
+    100% {transform: scale(1);}
+  }
+  .pill-button {
+    animation: jellyPop 0.6s ease-in-out;
+  }
 
-    input {
-      padding: 12px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 9999px;
-      width: 260px;
-      max-width: 90vw;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      transition: all 0.3s ease;
-      background-color: #ffffff;
-      color: #0b0b0b;
-    }
+  /* Jelly wave keyframes */
+  @keyframes jellywave {
+    0% {left: -100%; transform: scaleY(1);}
+    50% {left: 25%; transform: scaleY(1.4);}
+    100% {left: 100%; transform: scaleY(1);}
+  }
 
-    #name,
-    #email {
-      display: none;
-      opacity: 0;
-    }
+  /* Active press effect */
+  .pill-button:active {
+    transform: scale(0.98);
+  }
 
-    #starterInput {
-      text-align: center;
-    }
+  /* Input wrapper */
+  .pill-input-wrapper {
+    display: none;
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    justify-content: space-between;
+  }
 
-    form.expanded #starterInput {
-      display: none;
-    }
+  /* Input field styling */
+  .pill-input {
+    border: none;
+    outline: none;
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 9999px;
+    flex-grow: 1;
+    transition: transform 0.4s ease;
+  }
 
-    form.expanded #name,
-    form.expanded #email {
-      display: block;
-      opacity: 1;
-      text-align: left;
-    }
+  /* Animated placeholder label */
+  .input-label {
+    position: absolute;
+    left: 28px;
+    top: 14px;
+    font-size: 16px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+  .pill-input:focus + .input-label,
+  .pill-input:not(:placeholder-shown) + .input-label {
+    top: -8px;
+    font-size: 12px;
+    color: #B4735A;
+    background: white;
+    padding: 0 6px;
+  }
 
-    button {
-      background: black;
-      color: white;
-      font-size: 1rem;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      display: none;
-      cursor: pointer;
-      transition: transform 0.15s ease, color 0.3s ease;
-    }
+  /* Submit button inside input */
+  .input-submit-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
+    color: #B4735A;
+    transition: color 0.3s ease;
+  }
+  .input-submit-btn:hover {
+    color: #885b3e;
+  }
 
-    button:active {
-      transform: scale(0.97);
-    }
+  /* Loading spinner */
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #B4735A;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+    display: none;
+  }
+  @keyframes spin {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
+  }
 
-    form.expanded button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+  /* Suggestions dropdown */
+  .suggestions-list {
+    position: absolute;
+    top: 60px;
+    width: 280px;
+    background: white;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    max-height: 140px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+  }
+  .suggestions-list div {
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .suggestions-list div:hover,
+  .suggestions-list div.active {
+    background-color: #B4735A;
+    color: white;
+  }
 
-    .spinner {
-      border: 2px solid white;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      animation: spin 1s linear infinite;
-      display: none;
-    }
+  /* Shake animation for error */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%, 75% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+  }
+  .error-shake {
+    animation: shake 0.4s ease;
+    border-color: #D44333 !important;
+    box-shadow: 0 0 5px #D44333;
+  }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
+  /* Disabled state */
+  .pill-button.disabled,
+  .pill-input-wrapper.disabled {
+    background: #ccc;
+    color: #666 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+  }
 
-    .instagram {
-      position: absolute;
-      bottom: 60px;
-    }
+  /* Voice mic button */
+  .mic-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 20px;
+    color: #B4735A;
+    transition: color 0.3s ease;
+  }
+  .mic-button.active {
+    color: #D44333;
+  }
+  .mic-button:hover {
+    color: #885b3e;
+  }
 
-    .instagram img {
-      width: 32px;
-      transition: transform 0.3s ease;
-    }
+  /* Text cycling animation */
+  .text-cycle {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    height: 20px;
+  }
+  .text-cycle span {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    width: 100%;
+    text-align: center;
+  }
+  .text-cycle span.active {
+    opacity: 1;
+    position: relative;
+  }
 
-    .instagram:hover img {
-      transform: scale(1.1);
-    }
+  /* Background gradient animation */
+  @keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+  .gradient-bg {
+    background: linear-gradient(270deg, #B4735A, #E0C097, #B4735A);
+    background-size: 600% 600%;
+    animation: gradientBG 12s ease infinite;
+  }
 
-    footer {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.8rem;
-      color: #555;
-      width: 100%;
-      text-align: center;
-      user-select: none;
-    }
+  /* 3D parallax tilt */
+  .pill-container.tilt:hover .pill-button,
+  .pill-container.tilt:hover .pill-input-wrapper {
+    transform-style: preserve-3d;
+  }
+  .pill-container.tilt .pill-button,
+  .pill-container.tilt .pill-input-wrapper {
+    transition: transform 0.2s ease;
+  }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+  /* Jelly animation toggle (disabled style) */
+  .no-jelly .pill-button::after {
+    animation: none !important;
+  }
+  .no-jelly .pill-button,
+  .no-jelly .pill-input-wrapper {
+    animation: none !important;
+    transition: background-color 0.3s, transform 0.3s;
+  }
 
-    #privacyNote {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 12px;
-      max-width: 280px;
-    }
-  </style>
+</style>
 </head>
 <body>
 
-  <img class="logo" src="logo.png" alt="Logo" />
-  <h1>Coming Soon</h1>
+<div class="pill-container tilt gradient-bg" aria-label="Interactive jelly pill input">
 
-  <div id="form-container">
-    <form id="notifyForm" novalidate>
-      <input type="text" id="starterInput" placeholder="" autocomplete="off" />
-      <input type="text" id="name" name="name" placeholder="Full Name" autocomplete="name" />
-      <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required />
-      <button type="submit" id="submitBtn">
-        <span class="btn-text">Submit</span>
-        <div class="spinner" id="spinner"></div>
-      </button>
-    </form>
-    <div id="privacyNote">We respect your privacy. No spam, ever.</div>
+  <!-- Button with cycling text -->
+  <button class="pill-button" aria-haspopup="true" aria-expanded="false" aria-controls="suggestions" id="pillButton" type="button">
+    <span class="text-cycle" aria-live="polite" aria-atomic="true">
+      <span class="active">jorobean.com</span>
+      <span>Search our site</span>
+      <span>Try 'coffee'</span>
+      <span>Type and hit Enter</span>
+    </span>
+  </button>
+
+  <!-- Input wrapper: input + submit + mic -->
+  <div class="pill-input-wrapper" role="search" aria-label="Search input">
+    <input
+      id="pillInput"
+      class="pill-input"
+      type="text"
+      autocomplete="off"
+      placeholder="Type here..."
+      aria-describedby="inputLabel"
+      aria-invalid="false"
+      spellcheck="false"
+    />
+    <label class="input-label" for="pillInput" id="inputLabel">Search jorobean.com</label>
+    <button type="submit" class="input-submit-btn" aria-label="Submit search">&#10148;</button>
+    <button type="button" class="mic-button" aria-label="Activate voice input" title="Activate voice input">&#127908;</button>
+    <div class="loading-spinner" aria-hidden="true"></div>
   </div>
 
-  <a class="instagram" href="https://instagram.com/jorobean" target="_blank" rel="noopener noreferrer" aria-label="Jorobean Instagram">
-    <img src="instagram-icon.svg" alt="Instagram" />
-  </a>
+  <!-- Suggestions dropdown -->
+  <div class="suggestions-list" id="suggestions" role="listbox" aria-label="Search suggestions"></div>
 
-  <footer id="footer" aria-label="Site copyright"></footer>
+</div>
 
-  <script>
-    document.getElementById("footer").textContent =
-      `© ${new Date().getFullYear()} Jorobean — All rights reserved.`;
+<!-- Jelly animation toggle checkbox -->
+<div style="position:fixed; bottom:20px; left:20px; font-family: sans-serif; background:#fff; padding:10px 15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+  <label>
+    <input type="checkbox" id="toggleJelly" checked />
+    Enable Jelly Animations
+  </label>
+</div>
 
-    const form = document.getElementById("notifyForm");
-    const starterInput = document.getElementById("starterInput");
-    const nameInput = document.getElementById("name");
-    const emailInput = document.getElementById("email");
-    const button = document.getElementById("submitBtn");
-    const btnText = button.querySelector(".btn-text");
-    const spinner = document.getElementById("spinner");
+<script>
+  // ==== Variables ====
+  const pillButton = document.getElementById('pillButton');
+  const pillInputWrapper = document.querySelector('.pill-input-wrapper');
+  const pillInput = document.getElementById('pillInput');
+  const suggestionsList = document.getElementById('suggestions');
+  const submitBtn = pillInputWrapper.querySelector('.input-submit-btn');
+  const micBtn = pillInputWrapper.querySelector('.mic-button');
+  const loadingSpinner = pillInputWrapper.querySelector('.loading-spinner');
+  const container = document.querySelector('.pill-container');
+  const toggleJellyCheckbox = document.getElementById('toggleJelly');
 
-    const phrase = "Stay Updated";
-    let charIndex = 0, isDeleting = false;
-    let typingInterval;
+  // Text cycling variables
+  const cycleTexts = Array.from(document.querySelectorAll('.text-cycle span'));
+  let cycleIndex = 0;
+  let cycleInterval = null;
 
-    function type() {
-      if (!form.classList.contains("expanded")) {
-        if (!isDeleting) {
-          starterInput.value = phrase.substring(0, charIndex++);
-          if (charIndex > phrase.length) {
-            isDeleting = true;
-            setTimeout(type, 4000);
-            return;
-          }
-        } else {
-          starterInput.value = phrase.substring(0, charIndex--);
-          if (charIndex === 0) {
-            isDeleting = false;
-          }
-        }
-        typingInterval = setTimeout(type, 100);
-      }
+  // Sample autocomplete data
+  const sampleSuggestions = [
+    'coffee', 'coffee mug', 'coffee beans', 'coffee table', 'coffee shop',
+    'tea', 'tea leaves', 'tea pot', 'tea cup', 'tea shop',
+    'jerobean', 'jorobean.com', 'jorobean merch', 'jorobean sneaker'
+  ];
+
+  // Audio elements for sounds
+  const hoverSound = new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3'); // subtle hover sound
+  const clickSound = new Audio('https://freesound.org/data/previews/256/256117_3263906-lq.mp3'); // subtle click sound
+
+  // Speech recognition setup (browser support check)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  let recognition = null;
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+  }
+
+  // Accessibility helpers
+  function announceMessage(message) {
+    const liveRegion = document.getElementById('ariaLiveRegion') || (() => {
+      const div = document.createElement('div');
+      div.id = 'ariaLiveRegion';
+      div.setAttribute('aria-live', 'polite');
+      div.setAttribute('aria-atomic', 'true');
+      div.style.position = 'absolute';
+      div.style.width = '1px';
+      div.style.height = '1px';
+      div.style.overflow = 'hidden';
+      div.style.clip = 'rect(1px, 1px, 1px, 1px)';
+      div.style.clipPath = 'inset(50%)';
+      div.style.margin = '-1px';
+      div.style.border = '0';
+      document.body.appendChild(div);
+      return div;
+    })();
+    liveRegion.textContent = message;
+  }
+
+  // ==== Functions ====
+
+  // Cycle button text every 3s
+  function cycleButtonText() {
+    cycleTexts[cycleIndex].classList.remove('active');
+    cycleIndex = (cycleIndex + 1) % cycleTexts.length;
+    cycleTexts[cycleIndex].classList.add('active');
+  }
+
+  // Show input, hide button
+  function showInput() {
+    pillButton.style.display = 'none';
+    pillInputWrapper.style.display = 'flex';
+    pillInput.focus();
+    pillInput.value = '';
+    pillInput.setAttribute('aria-invalid', 'false');
+    clearSuggestions();
+  }
+
+  // Hide input, show button
+  function hideInput() {
+    pillInputWrapper.style.display = 'none';
+    pillButton.style.display = 'inline-flex';
+    clearSuggestions();
+  }
+
+  // Validate input (simple example: check non-empty and no spaces only)
+  function validateInput(value) {
+    return value.trim().length > 0;
+  }
+
+  // Shake animation on error
+  function triggerErrorShake() {
+    pillInput.classList.add('error-shake');
+    setTimeout(() => pillInput.classList.remove('error-shake'), 400);
+  }
+
+  // Show suggestions based on input text
+  function showSuggestions(value) {
+    clearSuggestions();
+    if (!value.trim()) return;
+
+    const filtered = sampleSuggestions.filter(item =>
+      item.toLowerCase().includes(value.toLowerCase())
+    ).slice(0, 5);
+
+    if (filtered.length === 0) {
+      suggestionsList.style.display = 'none';
+      return;
     }
 
-    type();
-
-    starterInput.addEventListener("focus", () => {
-      clearTimeout(typingInterval);
-      form.classList.add("expanded");
-      starterInput.value = "";
-      nameInput.focus();
+    filtered.forEach(item => {
+      const div = document.createElement('div');
+      div.textContent = item;
+      div.setAttribute('role', 'option');
+      div.tabIndex = 0;
+      div.addEventListener('click', () => {
+        pillInput.value = item;
+        clearSuggestions();
+        pillInput.focus();
+      });
+      div.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          div.click();
+        }
+      });
+      suggestionsList.appendChild(div);
     });
+    suggestionsList.style.display = 'block';
+  }
 
-    form.addEventListener("submit", async (e) => {
+  // Clear suggestions
+  function clearSuggestions() {
+    suggestionsList.innerHTML = '';
+    suggestionsList.style.display = 'none';
+  }
+
+  // Submit input value (simulate loading + validation)
+  function submitInput() {
+    const val = pillInput.value.trim();
+    if (!validateInput(val)) {
+      pillInput.setAttribute('aria-invalid', 'true');
+      triggerErrorShake();
+      announceMessage('Invalid input. Please type something.');
+      return;
+    }
+    pillInput.setAttribute('aria-invalid', 'false');
+    loadingSpinner.style.display = 'inline-block';
+    submitBtn.disabled = true;
+    pillInput.disabled = true;
+    micBtn.disabled = true;
+
+    announceMessage(`Searching for ${val}...`);
+
+    // Simulate loading delay
+    setTimeout(() => {
+      loadingSpinner.style.display = 'none';
+      submitBtn.disabled = false;
+      pillInput.disabled = false;
+      micBtn.disabled = false;
+      announceMessage(`Search completed for ${val}.`);
+      hideInput();
+    }, 2000);
+  }
+
+  // Sound effects on hover and click
+  pillButton.addEventListener('mouseenter', () => {
+    if(toggleJellyCheckbox.checked) hoverSound.play().catch(() => {});
+  });
+  pillButton.addEventListener('click', () => {
+    if(toggleJellyCheckbox.checked) clickSound.play().catch(() => {});
+    showInput();
+  });
+
+  submitBtn.addEventListener('click', e => {
+    e.preventDefault();
+    submitInput();
+  });
+
+  pillInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      submitInput();
+    } else if (e.key === 'ArrowDown') {
+      // Focus first suggestion
+      const first = suggestionsList.querySelector('div');
+      if(first) first.focus();
+    } else {
+      // Update suggestions live while typing
+      setTimeout(() => showSuggestions(pillInput.value), 0);
+    }
+  });
+
+  // Keyboard navigation for suggestions
+  suggestionsList.addEventListener('keydown', e => {
+    const active = document.activeElement;
+    if(e.key === 'ArrowDown') {
       e.preventDefault();
+      if(active.nextSibling) active.nextSibling.focus();
+      else suggestionsList.firstChild.focus();
+    } else if(e.key === 'ArrowUp') {
+      e.preventDefault();
+      if(active.previousSibling) active.previousSibling.focus();
+      else pillInput.focus();
+    } else if(e.key === 'Escape') {
+      pillInput.focus();
+      clearSuggestions();
+    }
+  });
 
-      if (!nameInput.value.trim() || !emailInput.value.trim()) {
-        alert("Please enter both name and email.");
-        return;
+  // Hide input on blur with delay to allow clicks
+  pillInput.addEventListener('blur', e => {
+    setTimeout(() => {
+      if(document.activeElement.parentNode !== suggestionsList) {
+        hideInput();
       }
+    }, 200);
+  });
 
-      btnText.style.display = "none";
-      spinner.style.display = "inline-block";
-      button.disabled = true;
+  // Mic voice input
+  micBtn.addEventListener('click', () => {
+    if (!recognition) {
+      alert("Speech recognition not supported in this browser.");
+      return;
+    }
+    if (micBtn.classList.contains('active')) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  });
 
-      const formData = new FormData();
-      formData.append("name", nameInput.value.trim());
-      formData.append("email", emailInput.value.trim());
-
-      try {
-        const res = await fetch("https://formspree.io/f/meoabwgg", {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: formData
-        });
-
-        if (!res.ok) throw new Error("Submit failed");
-
-        spinner.style.display = "none";
-        btnText.textContent = "Submit";
-        btnText.style.display = "inline-block";
-
-        form.reset();
-        form.classList.remove("expanded");
-
-        starterInput.value = "Thank You";
-        starterInput.disabled = true;
-        starterInput.style.display = "block";
-
-        setTimeout(() => {
-          location.reload();
-        }, 30000); // Reload after 30 seconds
-
-      } catch (err) {
-        spinner.style.display = "none";
-        btnText.style.display = "inline-block";
-        btnText.textContent = "Submit";
-        button.disabled = false;
-        alert("Something went wrong. Try again later.");
-        console.error(err);
-      }
+  if (recognition) {
+    recognition.addEventListener('start', () => {
+      micBtn.classList.add('active');
+      announceMessage("Voice input activated");
     });
-  </script>
+    recognition.addEventListener('end', () => {
+      micBtn.classList.remove('active');
+      announceMessage("Voice input stopped");
+    });
+    recognition.addEventListener('result', (event) => {
+      const transcript = event.results[0][0].transcript;
+      pillInput.value = transcript;
+      announceMessage(`You said: ${transcript}`);
+      showSuggestions(transcript);
+    });
+  }
+
+  // Cycle button text interval
+  cycleInterval = setInterval(cycleButtonText, 3000);
+
+  // 3D Parallax tilt effect
+  container.addEventListener('mousemove', e => {
+    if(!container.classList.contains('tilt')) return;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * 10; // max 10deg tilt
+    const rotateY = ((x - centerX) / centerX) * -10;
+
+    pillButton.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    pillInputWrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+  container.addEventListener('mouseleave', () => {
+    pillButton.style.transform = '';
+    pillInputWrapper.style.transform = '';
+  });
+
+  // Jelly animation toggle
+  toggleJellyCheckbox.addEventListener('change', () => {
+    if (toggleJellyCheckbox.checked) {
+      container.classList.remove('no-jelly');
+    } else {
+      container.classList.add('no-jelly');
+    }
+  });
+
+  // Initialize
+  hideInput();
+
+</script>
 
 </body>
 </html>
