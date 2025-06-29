@@ -4,20 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coming Soon</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
+      padding: 0;
       background-color: #f9f9f9;
-      color: rgb(11, 11, 11);
+      color: #0b0b0b;
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      text-align: center;
     }
 
-    img {
+    img.logo {
       max-width: 80%;
       height: auto;
     }
@@ -25,13 +32,41 @@
     h1 {
       margin-top: 20px;
       font-size: 2em;
-      text-align: center;
       letter-spacing: 2px;
+    }
+
+    a.instagram {
+      margin-top: 20px;
+      display: inline-block;
+    }
+
+    a.instagram img {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.3s ease;
+    }
+
+    a.instagram:hover img {
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5em;
+      }
+
+      a.instagram img {
+        width: 28px;
+        height: 28px;
+      }
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Logo" />
+  <img class="logo" src="logo.png" alt="Jorobean Logo" />
   <h1>Coming Soon</h1>
+  <a class="instagram" href="https://instagram.com/jorobean" target="_blank" rel="noopener noreferrer">
+    <img src="instagram-icon.svg" alt="Instagram" />
+  </a>
 </body>
 </html>
