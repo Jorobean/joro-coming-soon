@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -61,11 +60,56 @@
     }
 
     img.logo {
-      max-width: 80%;
+      max-width: 60%;
       height: auto;
       opacity: 0;
       animation: fadeIn 1s ease forwards;
       animation-delay: 0.3s;
+    }
+
+    .silhouette-container {
+      position: relative;
+      width: 320px;
+      height: 96px;
+      margin: 24px auto 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+      animation-delay: 0.45s;
+    }
+
+    .silhouette-img,
+    .wave-shoe-img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 320px;
+      height: 96px;
+      transition: opacity 0.7s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .silhouette-img {
+      z-index: 2;
+      opacity: 1;
+    }
+
+    .wave-shoe-img {
+      z-index: 1;
+      opacity: 0;
+    }
+
+    .silhouette-container:hover .silhouette-img,
+    .silhouette-container:focus-within .silhouette-img {
+      opacity: 0;
+    }
+
+    .silhouette-container:hover .wave-shoe-img,
+    .silhouette-container:focus-within .wave-shoe-img {
+      opacity: 1;
     }
 
     h1 {
@@ -73,14 +117,14 @@
       margin-top: 20px;
       opacity: 0;
       animation: fadeIn 1s ease forwards;
-      animation-delay: 0.6s;
+      animation-delay: 0.9s;
     }
 
     #form-container {
       margin-top: 40px;
       opacity: 0;
       animation: fadeIn 1s ease forwards;
-      animation-delay: 0.9s;
+      animation-delay: 1.2s;
     }
 
     form {
@@ -199,6 +243,10 @@
 </head>
 <body>
   <img class="logo" src="logo.png" alt="Jorobean Logo" />
+  <div class="silhouette-container">
+    <img class="silhouette-img" src="silhouette.svg" alt="Silhouette" />
+    <img class="wave-shoe-img" src="wave-shoe.svg" alt="Wave Shoe" />
+  </div>
   <h1>Coming Soon</h1>
   <div id="form-container">
     <form id="notifyForm" novalidate>
@@ -310,6 +358,12 @@
         console.error(err);
       }
     });
+
+    // Accessibility: allow keyboard focus to trigger the fade
+    const silhouetteContainer = document.querySelector('.silhouette-container');
+    if (silhouetteContainer) {
+      silhouetteContainer.tabIndex = 0;
+    }
   </script>
 </body>
 </html>
