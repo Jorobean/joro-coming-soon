@@ -418,6 +418,16 @@ h1 {
       form.classList.add("expanded");
       starterInput.value = "";
       nameInput.focus();
+      // Hide silhouette and wave images when form expands
+      const silhouetteContainer = document.querySelector('.silhouette-container');
+      if (silhouetteContainer) {
+        silhouetteContainer.style.display = 'none';
+      }
+      // Hide Coming Soon text
+      const comingSoonText = document.querySelector('h1');
+      if (comingSoonText) {
+        comingSoonText.style.display = 'none';
+      }
     });
 
     form.addEventListener("submit", async (e) => {
@@ -451,6 +461,16 @@ h1 {
 
         form.reset();
         form.classList.remove("expanded");
+        // Show silhouette and wave images again after form closes
+        const silhouetteContainer = document.querySelector('.silhouette-container');
+        if (silhouetteContainer) {
+          silhouetteContainer.style.display = '';
+        }
+        // Show Coming Soon text again
+        const comingSoonText = document.querySelector('h1');
+        if (comingSoonText) {
+          comingSoonText.style.display = '';
+        }
 
         starterInput.value = "Thank You";
         starterInput.disabled = true;
@@ -474,6 +494,38 @@ h1 {
     const silhouetteContainer = document.querySelector('.silhouette-container');
     if (silhouetteContainer) {
       silhouetteContainer.tabIndex = 0;
+      // Close form when clicking/tapping outside
+      function restoreAfterClose() {
+        silhouetteContainer.style.display = '';
+        // Show Coming Soon text again
+        const comingSoonText = document.querySelector('h1');
+        if (comingSoonText) {
+          comingSoonText.style.display = '';
+        }
+        // Restore Stay Updated text in starterInput and restart typing animation
+        starterInput.value = '';
+        starterInput.disabled = false;
+        starterInput.style.display = '';
+        charIndex = 0;
+        isDeleting = false;
+        type();
+      }
+      document.addEventListener('mousedown', function(e) {
+        if (form.classList.contains('expanded')) {
+          if (!form.contains(e.target)) {
+            form.classList.remove('expanded');
+            restoreAfterClose();
+          }
+        }
+      });
+      document.addEventListener('touchstart', function(e) {
+        if (form.classList.contains('expanded')) {
+          if (!form.contains(e.target)) {
+            form.classList.remove('expanded');
+            restoreAfterClose();
+          }
+        }
+      });
     }
 
     // Tap-to-reveal effect for mobile/touch devices, with auto re-hide after 5s
