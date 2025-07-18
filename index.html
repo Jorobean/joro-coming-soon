@@ -921,101 +921,107 @@
   </script>
 
   <!-- Dynamic 3D tilt effect for notifyForm panel -->
-  <script>
-    (function() {
-      let rafId = null;
-      let tiltActive = false;
-      
-      function applyTilt(form, e) {
-        const rect = form.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // px, py: -1 at left/top, 0 center, 1 at right/bottom
-        const px = (x / rect.width) * 2 - 1;
-        const py = (y / rect.height) * 2 - 1;
-        
-        // Each corner dips as mouse approaches it
-        const maxDeg = 10; // Reduced from 18 to make the tilt less pronounced
-        const rotateX = py * -maxDeg; // up/down (invert so top dips forward)
-        const rotateY = px * maxDeg;  // left/right
-        
-        form.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+<script>
+  (function () {
+    let rafId = null;
+    let tiltActive = false;
+
+    function applyTilt(form, e) {
+      const rect = form.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const px = (x / rect.width) * 2 - 1;
+      const py = (y / rect.height) * 2 - 1;
+
+      const maxDeg = 10;
+      const rotateX = py * -maxDeg;
+      const rotateY = px * maxDeg;
+
+      form.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    }
+
+    function handleMouseMove(e) {
+      if (!tiltActive) return;
+
+      const form = document.getElementById('notifyForm');
+      if (!form || !form.classList.contains('expanded')) return;
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        applyTilt(form, e);
+        rafId = null;
+      });
+    }
+
+    function handleOrientationTilt(event) {
+      const form = document.getElementById('notifyForm');
+      if (!form || !form.classList.contains('expanded')) return;
+
+      const { beta, gamma } = event;
+
+      const maxTilt = 10;
+      const tiltX = Math.max(-maxTilt, Math.min(maxTilt, beta - 90));
+      const tiltY = Math.max(-maxTilt, Math.min(maxTilt, gamma));
+
+      form.style.transform = `perspective(600px) rotateX(${-tiltX}deg) rotateY(${tiltY}deg)`;
+    }
+
+    function resetTilt() {
+      if (!tiltActive) return;
+
+      const form = document.getElementById('notifyForm');
+      if (!form || !form.classList.contains('expanded')) return;
+
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
       }
 
-      function handleMouseMove(e) {
-        if (!tiltActive) return;
-        
-        const form = document.getElementById('notifyForm');
-        if (!form || !form.classList.contains('expanded')) return;
-        
-        // Cancel any pending frame
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-        }
-        
-        // Schedule the tilt update
-        rafId = requestAnimationFrame(() => {
-          applyTilt(form, e);
-          rafId = null;
-        });
-      }
+      form.style.transition = 'transform 0.3s ease-out';
+      form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+      setTimeout(() => {
+        form.style.transition = '';
+      }, 300);
+    }
 
-      function resetTilt() {
-        if (!tiltActive) return;
-        
-        const form = document.getElementById('notifyForm');
-        if (!form || !form.classList.contains('expanded')) return;
-        
-        // Cancel any pending tilt update
-        if (rafId) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-        
-        // Smooth transition back to neutral
-        form.style.transition = 'transform 0.3s ease-out';
-        form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
-        
-        // Remove transition after it completes
-        setTimeout(() => {
-          form.style.transition = '';
-        }, 300);
-      }
+    function initTilt() {
+      const form = document.getElementById('notifyForm');
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      // Initialize tilt when form expands
-      function initTilt() {
-        const form = document.getElementById('notifyForm');
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        
-        if (!isTouchDevice && form) {
-          tiltActive = true;
-          
-          // Remove any existing transform and transition
-          form.style.transform = '';
-          form.style.transition = '';
-          
-          // Add event listeners
+      if (form) {
+        tiltActive = true;
+        form.style.transform = '';
+        form.style.transition = '';
+
+        if (isTouchDevice && window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientationTilt, true);
+        } else {
           form.addEventListener('mousemove', handleMouseMove);
           form.addEventListener('mouseleave', resetTilt);
           form.addEventListener('blur', resetTilt, true);
         }
       }
+    }
 
-      // Stop tilt when form collapses
-      function stopTilt() {
-        tiltActive = false;
-        resetTilt();
-        
-        const form = document.getElementById('notifyForm');
-        if (form) {
-          form.removeEventListener('mousemove', handleMouseMove);
-          form.removeEventListener('mouseleave', resetTilt);
-          form.removeEventListener('blur', resetTilt, true);
-        }
+    function stopTilt() {
+      tiltActive = false;
+      resetTilt();
+
+      const form = document.getElementById('notifyForm');
+      if (!form) return;
+
+      form.removeEventListener('mousemove', handleMouseMove);
+      form.removeEventListener('mouseleave', resetTilt);
+      form.removeEventListener('blur', resetTilt, true);
+
+      if (window.DeviceOrientationEvent) {
+        window.removeEventListener('deviceorientation', handleOrientationTilt, true);
       }
+    }
 
-      // Watch for form expansion
+    const form = document.getElementById('notifyForm');
+    if (form) {
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -1027,12 +1033,9 @@
           }
         });
       });
-
-      const form = document.getElementById('notifyForm');
-      if (form) {
-        observer.observe(form, { attributes: true, attributeFilter: ['class'] });
-      }
-    })();
-  </script>
+      observer.observe(form, { attributes: true, attributeFilter: ['class'] });
+    }
+  })();
+</script>
 </body>
 </html>
