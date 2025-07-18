@@ -6,30 +6,62 @@
   <style>
     body {
       margin: 0;
+      padding: 0;
       height: 100vh;
+      background: #e1e1e1;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: #e1e1e1;
-      font-family: sans-serif;
+      text-align: center;
     }
+
+    h1 {
+      font-size: 100px;
+      margin: 0;
+      color: #333;
+    }
+
+    p {
+      font-size: 20px;
+      color: #555;
+      margin-top: 10px;
+      margin-bottom: 30px;
+    }
+
     img {
       width: 200px;
       cursor: pointer;
+      margin-bottom: 20px;
     }
-    a {
-      margin-top: 20px;
+
+    a.button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #000;
+      color: #fff;
       text-decoration: none;
-      color: #000;
+      border-radius: 5px;
       font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    a.button:hover {
+      background: #444;
     }
   </style>
 </head>
 <body>
+
+  <h1>404</h1>
+  <p>Oops! The page you’re looking for doesn’t exist.</p>
+
   <a href="index.html">
     <img src="broken-heart.png" alt="Broken Heart" />
   </a>
-  <a href="index.html">Go back home</a>
+
+  <a href="index.html" class="button">Return to Homepage</a>
+
 </body>
 </html>
