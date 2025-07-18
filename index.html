@@ -181,6 +181,160 @@
       min-width: 320px;
       margin-left: auto;
       margin-right: auto;
+      overflow: hidden;
+      /* No idle animation */
+      transform-origin: center center;
+      transition: box-shadow 0.2s;
+    }
+
+
+    /* Dynamic tilt handled by JS. Only box-shadow on hover/focus for feedback. */
+    form.expanded:hover,
+    form.expanded:focus-within {
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.16);
+    }
+
+</div>
+
+</footer>
+<!-- Only one Instagram icon above for better mobile layout -->
+
+
+
+    @media (max-width: 600px) {
+      form.expanded {
+        transform-origin: 12% 10%;
+      }
+    }
+
+    @keyframes floating-tilt {
+      0% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+      12% {
+        transform: rotate(0.7deg) translateY(-2px) scale(1.01);
+      }
+      24% {
+        transform: rotate(1.3deg) translateY(-3px) scale(1.01);
+      }
+      36% {
+        transform: rotate(0.7deg) translateY(-2px) scale(1.01);
+      }
+      50% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+      62% {
+        transform: rotate(-2.1deg) translateY(2px) scale(0.99);
+      }
+      74% {
+        transform: rotate(-2.7deg) translateY(3px) scale(0.99);
+      }
+      86% {
+        transform: rotate(-2.1deg) translateY(2px) scale(0.99);
+      }
+      100% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+    }
+
+    @keyframes floating-tilt-strong {
+      0% {
+        transform: rotate(-3.5deg) translateY(0px) scale(1.01);
+      }
+      12% {
+        transform: rotate(2.2deg) translateY(-7px) scale(1.025);
+      }
+      24% {
+        transform: rotate(4deg) translateY(-10px) scale(1.03);
+      }
+      36% {
+        transform: rotate(2.2deg) translateY(-7px) scale(1.025);
+      }
+      50% {
+        transform: rotate(-3.5deg) translateY(0px) scale(1.01);
+      }
+      62% {
+        transform: rotate(-5.2deg) translateY(7px) scale(0.985);
+      }
+      74% {
+        transform: rotate(-7deg) translateY(10px) scale(0.98);
+      }
+      86% {
+        transform: rotate(-5.2deg) translateY(7px) scale(0.985);
+      }
+      100% {
+        transform: rotate(-3.5deg) translateY(0px) scale(1.01);
+      }
+    }
+
+    @media (max-width: 600px) {
+      form.expanded {
+        transform-origin: 12% 10%;
+      }
+    }
+
+    @keyframes floating-tilt {
+      0% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+      12% {
+        transform: rotate(0.7deg) translateY(-2px) scale(1.01);
+      }
+      24% {
+        transform: rotate(1.3deg) translateY(-3px) scale(1.01);
+      }
+      36% {
+        transform: rotate(0.7deg) translateY(-2px) scale(1.01);
+      }
+      50% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+      62% {
+        transform: rotate(-2.1deg) translateY(2px) scale(0.99);
+      }
+      74% {
+        transform: rotate(-2.7deg) translateY(3px) scale(0.99);
+      }
+      86% {
+        transform: rotate(-2.1deg) translateY(2px) scale(0.99);
+      }
+      100% {
+        transform: rotate(-1.2deg) translateY(0px) scale(1.00);
+      }
+    }
+
+    form.expanded::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -60%;
+      width: 220%;
+      height: 220%;
+      background: linear-gradient(120deg, rgba(255,255,255,0.0) 60%, rgba(255,255,255,0.35) 70%, rgba(255,255,255,0.0) 80%);
+      transform: rotate(0deg);
+      pointer-events: none;
+      z-index: 1001;
+      animation: glint-panel 2.8s linear infinite;
+    }
+
+    @keyframes glint-panel {
+      0% {
+        transform: translate(-100%, -100%) rotate(15deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.2;
+      }
+      40% {
+        opacity: 0.7;
+      }
+      60% {
+        opacity: 0.2;
+      }
+      100% {
+        transform: translate(100%, 100%) rotate(15deg);
+        opacity: 0;
+      }
     }
 
     .signup-lead {
@@ -188,7 +342,7 @@
       color: #222;
       margin-bottom: 18px;
       margin-top: 0;
-      font-weight: 500;
+      transform-origin: center center;
     }
 
     form {
@@ -218,12 +372,29 @@
       opacity: 0;
     }
 
+    @keyframes shine-reverse {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     #starterInput {
-      background: #b71111;
-      color: #fff;
+      background: linear-gradient(
+        120deg,
+        #b71111 40%,
+        #d32f2f 50%,
+        #b71111 60%
+      );
+      background-size: 200% 100%;
+      animation: shine-reverse 10s cubic-bezier(.4,0,.2,1) infinite;
+      color: white;
+      font-weight: bold;
       text-align: center;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
     }
+
+    /* Glint effect removed in favor of animated gradient shine */
 
     form.expanded #starterInput {
       display: none;
@@ -383,7 +554,128 @@
       <img class="silhouette-img" src="silhouette.svg" alt="Silhouette" />
       <img class="wave-shoe-img" src="wave-shoe.svg" alt="Wave Shoe" />
     </div>
-    <h1 style="margin-bottom:0.3em;">Coming Soon</h1>
+    <div class="wave-text-container" tabindex="0" aria-label="WAVE reveal">
+      <!-- Default text -->
+      <svg class="wave-text-svg coming-soon" viewBox="0 0 100 28" style="display:block;">
+        <text text-anchor="middle" x="50" y="22" font-size="24" fill="#0b0b0b" font-family="'Cabin Condensed', Arial, sans-serif">Coming Soon</text>
+      </svg>
+      <!-- WAVE liquid effect text -->
+      <svg class="wave-text-svg wave-effect" viewBox="0 0 220 38" style="display:none;">
+        <defs>
+          <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0463d3"/>
+            <stop offset="100%" stop-color="#7cb9ff"/>
+          </linearGradient>
+          <pattern id="wave" x="0" y="-2" width="220" height="38" patternUnits="userSpaceOnUse">
+            <path id="wavePath" d="M-110 18 Q-95 10 -80 18 T-50 18 T-20 18 T10 18 T40 18 T70 18 T100 18 T130 18 T160 18 T190 18 T220 18 V38 H-110z" fill="url(#gradient)">
+              <animateTransform
+                  attributeName="transform"
+                  type="translate"
+                  values="0,0;110,0;110,38;0,38;0,0"
+                  keyTimes="0;0.5;0.6;0.62;1"
+                  dur="6s"
+                  repeatCount="indefinite" />
+              <animate
+                  attributeName="opacity"
+                  values="1;1;0;0;1"
+                  keyTimes="0;0.5;0.6;0.62;1"
+                  dur="6s"
+                  repeatCount="indefinite" />
+            </path>
+          </pattern>
+        </defs>
+        <text text-anchor="middle" x="110" y="32" font-size="34" letter-spacing="14" fill="white" fill-opacity="0.1" font-family="'Cabin Condensed', Arial, sans-serif">WAVE</text>
+        <text text-anchor="middle" x="110" y="32" font-size="34" letter-spacing="14" fill="url(#wave)" fill-opacity="1" font-family="'Cabin Condensed', Arial, sans-serif" stroke="#909090" stroke-width="0.2">WAVE</text>
+      </svg>
+    </div>
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=Cabin+Condensed');
+      .wave-text-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: clamp(15px, 3vw, 25px) 0 0 0;
+        outline: none;
+        cursor: pointer;
+        min-height: 32px;
+      }
+      .wave-text-svg {
+        font-weight: bold;
+        max-width: 900px;
+        width: 100%;
+        height: 64px;
+        user-select: none;
+        pointer-events: none;
+      }
+      @media (max-width: 600px) {
+        .wave-text-svg {
+          height: 44px;
+        }
+      }
+    </style>
+  <script>
+    // ...existing code...
+    // WAVE text effect sync with silhouette/wave-shoe state
+    (function() {
+      const waveTextContainer = document.querySelector('.wave-text-container');
+      if (!waveTextContainer) return;
+      const comingSoonSVG = waveTextContainer.querySelector('.coming-soon');
+      const waveSVG = waveTextContainer.querySelector('.wave-effect');
+      const silhouetteContainer = document.querySelector('.silhouette-container');
+      if (!silhouetteContainer) return;
+
+      function updateWaveText() {
+        if (silhouetteContainer.classList.contains('revealed')) {
+          comingSoonSVG.style.display = 'none';
+          waveSVG.style.display = 'block';
+        } else {
+          comingSoonSVG.style.display = 'block';
+          waveSVG.style.display = 'none';
+        }
+      }
+
+      // Desktop: hover/focus
+      silhouetteContainer.addEventListener('mouseenter', function() {
+        silhouetteContainer.classList.add('revealed');
+        updateWaveText();
+      });
+      silhouetteContainer.addEventListener('mouseleave', function() {
+        silhouetteContainer.classList.remove('revealed');
+        updateWaveText();
+      });
+      silhouetteContainer.addEventListener('focus', function() {
+        silhouetteContainer.classList.add('revealed');
+        updateWaveText();
+      });
+      silhouetteContainer.addEventListener('blur', function() {
+        silhouetteContainer.classList.remove('revealed');
+        updateWaveText();
+      });
+
+      // Mobile: tap to show for 3s (sync with existing logic)
+      let revealTimeout = null;
+      function isTouch() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      }
+      silhouetteContainer.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        silhouetteContainer.classList.add('revealed');
+        updateWaveText();
+        if (revealTimeout) clearTimeout(revealTimeout);
+        revealTimeout = setTimeout(function() {
+          silhouetteContainer.classList.remove('revealed');
+          updateWaveText();
+        }, 3000);
+      }, { passive: false });
+
+      // Initial state
+      updateWaveText();
+    })();
+    // ...existing code...
+  </script>
   </div>
   <footer id="footer" aria-label="Site copyright">
     <form id="notifyForm" novalidate style="display:flex;flex-direction:column;align-items:center;gap:12px;max-width:320px;margin:0 auto;">
@@ -391,7 +683,7 @@
         <img src="instagram-icon.svg" alt="Instagram Icon" style="width:32px;" />
       </a>
       <input type="text" id="starterInput" placeholder="" autocomplete="off" />
-      <input type="text" id="name" name="name" placeholder="Full Name" autocomplete="name" />
+      <input type="text" id="name" name="name" placeholder="Name" autocomplete="name" />
       <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required />
       <button type="submit" id="submitBtn">
         <span class="btn-text">Submit</span>
@@ -405,6 +697,7 @@
   </footer>
   <!-- Only one Instagram icon above for better mobile layout -->
   <script>
+
     document.getElementById("copyright").textContent =
       `© ${new Date().getFullYear()} Jorobean — All rights reserved.`;
 
@@ -420,6 +713,8 @@
     let charIndex = 0, isDeleting = false;
     let typingInterval;
 
+    // Glint effect removed: now handled by CSS-only animation on #starterInput
+
     function type() {
       if (!form.classList.contains("expanded")) {
         if (!isDeleting) {
@@ -431,8 +726,12 @@
           }
         } else {
           starterInput.value = phrase.substring(0, charIndex--);
-          if (charIndex === 0) {
+          if (charIndex === -1) {
+            starterInput.value = '';
             isDeleting = false;
+            setTimeout(type, 1200); // Longer pause before typing again
+            charIndex = 0;
+            return;
           }
         }
         typingInterval = setTimeout(type, 100);
@@ -617,6 +916,121 @@
       const contentWrapper = document.querySelector('.content-wrapper');
       if (contentWrapper) {
         observer.observe(contentWrapper, { attributes: true, attributeFilter: ['style'] });
+      }
+    })();
+  </script>
+
+  <!-- Dynamic 3D tilt effect for notifyForm panel -->
+  <script>
+    (function() {
+      let rafId = null;
+      let tiltActive = false;
+      
+      function applyTilt(form, e) {
+        const rect = form.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // px, py: -1 at left/top, 0 center, 1 at right/bottom
+        const px = (x / rect.width) * 2 - 1;
+        const py = (y / rect.height) * 2 - 1;
+        
+        // Each corner dips as mouse approaches it
+        const maxDeg = 10; // Reduced from 18 to make the tilt less pronounced
+        const rotateX = py * -maxDeg; // up/down (invert so top dips forward)
+        const rotateY = px * maxDeg;  // left/right
+        
+        form.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      }
+
+      function handleMouseMove(e) {
+        if (!tiltActive) return;
+        
+        const form = document.getElementById('notifyForm');
+        if (!form || !form.classList.contains('expanded')) return;
+        
+        // Cancel any pending frame
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+        }
+        
+        // Schedule the tilt update
+        rafId = requestAnimationFrame(() => {
+          applyTilt(form, e);
+          rafId = null;
+        });
+      }
+
+      function resetTilt() {
+        if (!tiltActive) return;
+        
+        const form = document.getElementById('notifyForm');
+        if (!form || !form.classList.contains('expanded')) return;
+        
+        // Cancel any pending tilt update
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        
+        // Smooth transition back to neutral
+        form.style.transition = 'transform 0.3s ease-out';
+        form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+        
+        // Remove transition after it completes
+        setTimeout(() => {
+          form.style.transition = '';
+        }, 300);
+      }
+
+      // Initialize tilt when form expands
+      function initTilt() {
+        const form = document.getElementById('notifyForm');
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (!isTouchDevice && form) {
+          tiltActive = true;
+          
+          // Remove any existing transform and transition
+          form.style.transform = '';
+          form.style.transition = '';
+          
+          // Add event listeners
+          form.addEventListener('mousemove', handleMouseMove);
+          form.addEventListener('mouseleave', resetTilt);
+          form.addEventListener('blur', resetTilt, true);
+        }
+      }
+
+      // Stop tilt when form collapses
+      function stopTilt() {
+        tiltActive = false;
+        resetTilt();
+        
+        const form = document.getElementById('notifyForm');
+        if (form) {
+          form.removeEventListener('mousemove', handleMouseMove);
+          form.removeEventListener('mouseleave', resetTilt);
+          form.removeEventListener('blur', resetTilt, true);
+        }
+      }
+
+      // Watch for form expansion
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (mutation.target.classList.contains('expanded')) {
+              initTilt();
+            } else {
+              stopTilt();
+            }
+          }
+        });
+      });
+
+      const form = document.getElementById('notifyForm');
+      if (form) {
+        observer.observe(form, { attributes: true, attributeFilter: ['class'] });
       }
     })();
   </script>
