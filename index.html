@@ -921,117 +921,189 @@
   </script>
 
   <!-- Dynamic 3D tilt effect for notifyForm panel -->
-<script>
-  (function () {
-    let rafId = null;
-    let tiltActive = false;
-
-    function applyTilt(form, e) {
-      const rect = form.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const px = (x / rect.width) * 2 - 1;
-      const py = (y / rect.height) * 2 - 1;
-
-      const maxDeg = 10;
-      const rotateX = py * -maxDeg;
-      const rotateY = px * maxDeg;
-
-      form.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    }
-
-    function handleMouseMove(e) {
-      if (!tiltActive) return;
-      const form = document.getElementById('notifyForm');
-      if (!form || !form.classList.contains('expanded')) return;
-
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        applyTilt(form, e);
-        rafId = null;
-      });
-    }
-
-    function handleOrientationTilt(event) {
-      const form = document.getElementById('notifyForm');
-      if (!form || !form.classList.contains('expanded')) return;
-
-      const { beta, gamma } = event;
-      const maxTilt = 10;
-      const tiltX = Math.max(-maxTilt, Math.min(maxTilt, beta - 90));
-      const tiltY = Math.max(-maxTilt, Math.min(maxTilt, gamma));
-
-      form.style.transform = `perspective(600px) rotateX(${-tiltX}deg) rotateY(${tiltY}deg)`;
-    }
-
-    function resetTilt() {
-      if (!tiltActive) return;
-      const form = document.getElementById('notifyForm');
-      if (!form || !form.classList.contains('expanded')) return;
-
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
+  <script>
+    (function() {
+      let rafId = null;
+      let tiltActive = false;
+      
+      function applyTilt(form, e) {
+        const rect = form.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Convert to normalized coordinates (-1 to 1)
+        const px = (x / rect.width) * 2 - 1;
+        const py = (y / rect.height) * 2 - 1;
+        
+        // Maximum tilt angle
+        const maxDeg = 10;
+        
+        // Direct mapping: px controls Y-axis rotation, py controls X-axis rotation
+        const rotateX = -py * maxDeg;
+        const rotateY = px * maxDeg;
+        
+        form.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       }
 
-      form.style.transition = 'transform 0.3s ease-out';
-      form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
-      setTimeout(() => {
-        form.style.transition = '';
-      }, 300);
-    }
-
-    function initTilt() {
-      const form = document.getElementById('notifyForm');
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-      if (!form) return;
-
-      tiltActive = true;
-      form.style.transform = '';
-      form.style.transition = '';
-
-      if (isTouchDevice && window.DeviceOrientationEvent) {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-          // iOS 13+
-          DeviceOrientationEvent.requestPermission()
-            .then(permissionState => {
-              if (permissionState === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientationTilt, true);
-              }
-            })
-            .catch(console.error);
-        } else {
-          // Android or non-iOS browsers
-          window.addEventListener('deviceorientation', handleOrientationTilt, true);
+      function handleMouseMove(e) {
+        if (!tiltActive) return;
+        
+        const form = document.getElementById('notifyForm');
+        if (!form || !form.classList.contains('expanded')) return;
+        
+        // Cancel any pending frame
+        if (rafId) {
+          cancelAnimationFrame(rafId);
         }
-      } else {
-        // Desktop
+        
+        // Schedule the tilt update
+        rafId = requestAnimationFrame(() => {
+          applyTilt(form, e);
+          rafId = null;
+        });
+      }
+
+      function resetTilt() {
+        const form = document.getElementById('notifyForm');
+        if (!form || !form.classList.contains('expanded')) return;
+        
+        // Cancel any pending tilt update
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        
+        // Only apply reset if we're not in a touch tilt animation
+        if (!isTilting) {
+          // Clear any existing transitions first
+          form.style.transition = '';
+          
+          // Force a reflow
+          void form.offsetWidth;
+          
+          // Smooth transition back to neutral
+          form.style.transition = 'transform 0.3s ease-out';
+          form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+          
+          // Remove transition after it completes
+          setTimeout(() => {
+            form.style.transition = '';
+          }, 300);
+        }
+      }
+
+      // Initialize tilt when form expands
+      // Handle touch taps in corners
+      // Track if we're currently in a tilt animation
+      let isTilting = false;
+
+      function handleTouchTap(e) {
+        const form = document.getElementById('notifyForm');
+        if (!form || !form.classList.contains('expanded')) return;
+        
+        const touch = e.touches[0];
+        const rect = form.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        // Define corner regions (20% of width/height)
+        const cornerSize = {
+          x: rect.width * 0.2,
+          y: rect.height * 0.2
+        };
+        
+        // Determine which corner was tapped
+        let tiltX = 0, tiltY = 0;
+        
+        if (x < cornerSize.x) { // Left side
+          tiltX = -1;
+        } else if (x > rect.width - cornerSize.x) { // Right side
+          tiltX = 1;
+        }
+        
+        if (y < cornerSize.y) { // Top
+          tiltY = 1;
+        } else if (y > rect.height - cornerSize.y) { // Bottom
+          tiltY = -1;
+        }
+        
+        // If a corner was tapped and we're not already tilting
+        if ((tiltX !== 0 || tiltY !== 0) && !isTilting) {
+          isTilting = true;
+          
+          // Clear any existing transitions
+          form.style.transition = '';
+          
+          // Force a reflow
+          void form.offsetWidth;
+          
+          // Apply tilt with transition
+          form.style.transition = 'transform 0.15s ease-out';
+          form.style.transform = `perspective(600px) rotateX(${tiltY * 10}deg) rotateY(${tiltX * 10}deg)`;
+          
+          // Reset after 300ms
+          setTimeout(() => {
+            form.style.transition = 'transform 0.3s ease-out';
+            form.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+            
+            // Remove transition and clear tilting flag after reset completes
+            setTimeout(() => {
+              form.style.transition = '';
+              isTilting = false;
+            }, 300);
+          }, 300);
+        }
+        
+        // Prevent any mouse tracking while touch tilt is active
+        if (isTilting) {
+          tiltActive = false;
+        }
+      }
+
+      function initTilt() {
+        const form = document.getElementById('notifyForm');
+        if (!form) return;
+        
+        // Reset state
+        tiltActive = true;
+        isTilting = false;
+        
+        // Clear any existing styles
+        form.style.transform = '';
+        form.style.transition = '';
+        
+        // Add event listeners for both touch and mouse
+        form.addEventListener('touchstart', handleTouchTap);
         form.addEventListener('mousemove', handleMouseMove);
         form.addEventListener('mouseleave', resetTilt);
         form.addEventListener('blur', resetTilt, true);
+        
+        // Add touchend listener to ensure we can resume mouse tracking
+        form.addEventListener('touchend', () => {
+          setTimeout(() => {
+            if (!isTilting) {
+              tiltActive = true;
+            }
+          }, 50);
+        });
       }
-    }
 
-    function stopTilt() {
-      tiltActive = false;
-      resetTilt();
-
-      const form = document.getElementById('notifyForm');
-      if (!form) return;
-
-      form.removeEventListener('mousemove', handleMouseMove);
-      form.removeEventListener('mouseleave', resetTilt);
-      form.removeEventListener('blur', resetTilt, true);
-
-      if (window.DeviceOrientationEvent) {
-        window.removeEventListener('deviceorientation', handleOrientationTilt, true);
+      // Stop tilt when form collapses
+      function stopTilt() {
+        tiltActive = false;
+        resetTilt();
+        
+        const form = document.getElementById('notifyForm');
+        if (form) {
+          // Remove both mouse and touch event listeners
+          form.removeEventListener('mousemove', handleMouseMove);
+          form.removeEventListener('mouseleave', resetTilt);
+          form.removeEventListener('blur', resetTilt, true);
+          form.removeEventListener('touchstart', handleTouchTap);
+        }
       }
-    }
 
-    const form = document.getElementById('notifyForm');
-    if (form) {
+      // Watch for form expansion
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
@@ -1043,9 +1115,12 @@
           }
         });
       });
-      observer.observe(form, { attributes: true, attributeFilter: ['class'] });
-    }
-  })();
-</script>
+
+      const form = document.getElementById('notifyForm');
+      if (form) {
+        observer.observe(form, { attributes: true, attributeFilter: ['class'] });
+      }
+    })();
+  </script>
 </body>
 </html>
