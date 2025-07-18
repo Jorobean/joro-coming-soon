@@ -61,7 +61,8 @@
     }
 
     img.logo {
-      max-width: 32vw;
+      max-width: 520px;
+      width: 100%;
       height: auto;
       position: fixed;
       top: 0;
@@ -75,20 +76,30 @@
       transition: box-shadow 0.2s;
     }
 
-    .silhouette-container {
-      position: relative;
-      width: 60vw;
-      max-width: 540px;
-      height: 18vw;
-      max-height: 180px;
-      margin: 0 auto 0 auto;
+    .content-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       opacity: 0;
       transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
       animation: fadeIn 1s ease forwards;
       animation-delay: 0.45s;
+      z-index: 50;
+    }
+
+    .silhouette-container {
+      width: 80vw;
+      max-width: 600px;
+      height: clamp(180px, 28vw, 340px);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
     .silhouette-img,
@@ -126,18 +137,16 @@
       }
     }
 
-h1 {
-  font-size: 1.5em;
-  margin-top: 0;
-  opacity: 0;
-  transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 0.9s;
-  font-weight: bold;
-  letter-spacing: 0.01em;
-  z-index: 1;
-  position: relative;
-}
+    h1 {
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      margin: clamp(15px, 3vw, 25px) 0 0 0;
+      opacity: 0;
+      transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
+      animation: fadeIn 1s ease forwards;
+      animation-delay: 0.9s;
+      font-weight: bold;
+      letter-spacing: 0.01em;
+    }
 
     #form-container {
       margin-top: 0;
@@ -303,7 +312,7 @@ h1 {
         margin-bottom: 6px;
       }
       img.logo {
-        max-width: 68vw;
+        max-width: clamp(32vw, 50vw, 68vw);
         padding-top: 2px;
         padding-bottom: 2px;
         position: fixed !important;
@@ -316,18 +325,23 @@ h1 {
       body {
         padding-top: 18px;
       }
+      .content-wrapper {
+        position: relative !important;
+        top: unset !important;
+        left: unset !important;
+        transform: unset !important;
+        margin-top: 2vh !important;
+        margin-bottom: 2vh !important;
+      }
       .silhouette-container {
         width: 100vw;
         max-width: 100vw;
-        height: 60vw;
-        max-height: 260px;
-        margin-top: 0.5vh;
-        margin-bottom: 0;
+        height: clamp(180px, 28vw, 340px);
+        margin: 0;
       }
       h1 {
-        font-size: 1.1em;
-        margin-top: 1vh;
-        margin-bottom: 0.3em;
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        margin: clamp(15px, 3vw, 25px) 0 0.3em 0;
       }
       .instagram {
         margin-top: 4px !important;
@@ -360,11 +374,13 @@ h1 {
 <body>
   <img class="logo" src="logo.svg" alt="Jorobean Logo" style="position:absolute;top:2px;left:50%;transform:translateX(-50%);margin-top:0;z-index:10;" />
   <div style="height:0.5vh;"></div>
-  <div class="silhouette-container">
-    <img class="silhouette-img" src="silhouette.svg" alt="Silhouette" />
-    <img class="wave-shoe-img" src="wave-shoe.svg" alt="Wave Shoe" />
+  <div class="content-wrapper">
+    <div class="silhouette-container">
+      <img class="silhouette-img" src="silhouette.svg" alt="Silhouette" />
+      <img class="wave-shoe-img" src="wave-shoe.svg" alt="Wave Shoe" />
+    </div>
+    <h1 style="margin-bottom:0.3em;">Coming Soon</h1>
   </div>
-  <h1 style="margin-bottom:0.3em;">Coming Soon</h1>
   <footer id="footer" aria-label="Site copyright">
     <form id="notifyForm" novalidate style="display:flex;flex-direction:column;align-items:center;gap:12px;max-width:320px;margin:0 auto;">
       <a class="instagram" href="https://instagram.com/jorobean" target="_blank" rel="noopener noreferrer" aria-label="Jorobean Instagram" style="display:block;margin:0 auto 8px auto;position:static;">
@@ -426,15 +442,10 @@ h1 {
       form.classList.add("expanded");
       starterInput.value = "";
       nameInput.focus();
-      // Hide silhouette and wave images when form expands
-      const silhouetteContainer = document.querySelector('.silhouette-container');
-      if (silhouetteContainer) {
-        silhouetteContainer.style.display = 'none';
-      }
-      // Hide Coming Soon text
-      const comingSoonText = document.querySelector('h1');
-      if (comingSoonText) {
-        comingSoonText.style.display = 'none';
+      // Hide content wrapper when form expands
+      const contentWrapper = document.querySelector('.content-wrapper');
+      if (contentWrapper) {
+        contentWrapper.style.display = 'none';
       }
     });
 
@@ -469,15 +480,10 @@ h1 {
 
         form.reset();
         form.classList.remove("expanded");
-        // Show silhouette and wave images again after form closes
-        const silhouetteContainer = document.querySelector('.silhouette-container');
-        if (silhouetteContainer) {
-          silhouetteContainer.style.display = '';
-        }
-        // Show Coming Soon text again
-        const comingSoonText = document.querySelector('h1');
-        if (comingSoonText) {
-          comingSoonText.style.display = '';
+        // Show content wrapper again after form closes
+        const contentWrapper = document.querySelector('.content-wrapper');
+        if (contentWrapper) {
+          contentWrapper.style.display = '';
         }
 
         starterInput.value = "Thank You";
@@ -504,21 +510,13 @@ h1 {
       silhouetteContainer.tabIndex = 0;
       // Close form when clicking/tapping outside
       function restoreAfterClose() {
-        // Fade in silhouette and Coming Soon text together, faster
-        const silhouette = document.querySelector('.silhouette-container');
-        const comingSoonText = document.querySelector('h1');
-        if (silhouette) {
-          silhouette.style.opacity = 0;
-          silhouette.style.display = '';
+        // Fade in content wrapper together, faster
+        const contentWrapper = document.querySelector('.content-wrapper');
+        if (contentWrapper) {
+          contentWrapper.style.opacity = 0;
+          contentWrapper.style.display = '';
           setTimeout(() => {
-            silhouette.style.opacity = 1;
-          }, 10);
-        }
-        if (comingSoonText) {
-          comingSoonText.style.opacity = 0;
-          comingSoonText.style.display = '';
-          setTimeout(() => {
-            comingSoonText.style.opacity = 1;
+            contentWrapper.style.opacity = 1;
           }, 10);
         }
         // Restore Stay Updated text in starterInput and restart typing animation
@@ -608,11 +606,14 @@ h1 {
       
       // Clean up timeout when container is hidden (e.g., form expands)
       const observer = new MutationObserver(() => {
-        if (container.style.display === 'none') {
+        if (contentWrapper.style.display === 'none') {
           hideWaveShoe();
         }
       });
-      observer.observe(container, { attributes: true, attributeFilter: ['style'] });
+      const contentWrapper = document.querySelector('.content-wrapper');
+      if (contentWrapper) {
+        observer.observe(contentWrapper, { attributes: true, attributeFilter: ['style'] });
+      }
     })();
   </script>
 </body>
