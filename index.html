@@ -943,7 +943,6 @@
 
     function handleMouseMove(e) {
       if (!tiltActive) return;
-
       const form = document.getElementById('notifyForm');
       if (!form || !form.classList.contains('expanded')) return;
 
@@ -959,7 +958,6 @@
       if (!form || !form.classList.contains('expanded')) return;
 
       const { beta, gamma } = event;
-
       const maxTilt = 10;
       const tiltX = Math.max(-maxTilt, Math.min(maxTilt, beta - 90));
       const tiltY = Math.max(-maxTilt, Math.min(maxTilt, gamma));
@@ -969,7 +967,6 @@
 
     function resetTilt() {
       if (!tiltActive) return;
-
       const form = document.getElementById('notifyForm');
       if (!form || !form.classList.contains('expanded')) return;
 
@@ -989,18 +986,31 @@
       const form = document.getElementById('notifyForm');
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      if (form) {
-        tiltActive = true;
-        form.style.transform = '';
-        form.style.transition = '';
+      if (!form) return;
 
-        if (isTouchDevice && window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientationTilt, true);
+      tiltActive = true;
+      form.style.transform = '';
+      form.style.transition = '';
+
+      if (isTouchDevice && window.DeviceOrientationEvent) {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          // iOS 13+
+          DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientationTilt, true);
+              }
+            })
+            .catch(console.error);
         } else {
-          form.addEventListener('mousemove', handleMouseMove);
-          form.addEventListener('mouseleave', resetTilt);
-          form.addEventListener('blur', resetTilt, true);
+          // Android or non-iOS browsers
+          window.addEventListener('deviceorientation', handleOrientationTilt, true);
         }
+      } else {
+        // Desktop
+        form.addEventListener('mousemove', handleMouseMove);
+        form.addEventListener('mouseleave', resetTilt);
+        form.addEventListener('blur', resetTilt, true);
       }
     }
 
