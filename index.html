@@ -846,13 +846,28 @@
       formData.append("email", emailInput.value.trim());
 
       try {
-        const res = await fetch("https://formspree.io/f/meoabwgg", {
+        // Send to Formspree
+        const formspreeRes = await fetch("https://formspree.io/f/meoabwgg", {
           method: "POST",
           headers: { Accept: "application/json" },
           body: formData
         });
 
-        if (!res.ok) throw new Error("Submit failed");
+        // Send to Google Sheets
+        const sheetsRes = await fetch('https://script.google.com/macros/s/AKfycbzqIkE-C45jtw6B-E549upyZkW0aRie2n1xOV50fMM9e7xk4q4v2omf-Qupyt4xoWFQ/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: nameInput.value.trim(),
+            email: emailInput.value.trim()
+          })
+        });
+
+        // Only check Formspree response since Google Sheets is no-cors
+        if (!formspreeRes.ok) throw new Error("Submit failed");
 
         spinner.style.display = "none";
         btnText.textContent = "Submit";
