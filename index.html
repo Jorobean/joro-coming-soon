@@ -68,8 +68,9 @@
       top: 0;
       left: 0;
       width: 100%;
-      z-index: 100;
+      z-index: 1000;
       padding: 10px;
+      pointer-events: none;
     }
 
     .logo {
@@ -78,6 +79,7 @@
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+      pointer-events: all;
     }
 
     .logo-centered {
@@ -97,6 +99,19 @@
       visibility: hidden;
     }
 
+    form.expanded ~ .logo-container .logo-centered,
+    #notifyForm.expanded ~ .logo-container .logo-centered {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    form.expanded ~ .logo-container .logo-corner,
+    #notifyForm.expanded ~ .logo-container .logo-corner {
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 2000;
+    }
+
     body.scrolled .logo-centered {
       opacity: 0;
       visibility: hidden;
@@ -105,16 +120,6 @@
     body.scrolled .logo-corner {
       opacity: 1;
       visibility: visible;
-    }
-
-    form.expanded ~ .logo-container .logo-centered {
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-
-    form.expanded ~ .logo-container .logo-corner {
-      opacity: 1 !important;
-      visibility: visible !important;
     }
 
     .content-wrapper {
@@ -203,6 +208,14 @@
       opacity: 0;
       animation: fadeIn 1s ease forwards;
       animation-delay: 1.2s;
+    }
+    
+    @media screen and (max-height: 600px) {
+      #form-container {
+        position: relative;
+        bottom: auto;
+        margin: 20px auto;
+      }
     }
 
     form.expanded {
@@ -514,13 +527,27 @@
 
     @media (max-width: 600px) {
       #form-container {
-        bottom: 12px;
-        margin-bottom: 0;
+        position: static;
+        margin: 20px auto;
+        padding-bottom: 20px;
       }
       .signup-lead {
         font-size: 0.93em;
         margin-top: 6px;
         margin-bottom: 6px;
+      }
+      
+      /* Adjust form position when virtual keyboard is likely open */
+      @media (max-height: 500px) {
+        body {
+          padding-top: 10px;
+        }
+        #form-container {
+          margin: 10px auto;
+        }
+        .content-wrapper {
+          display: none;
+        }
       }
       .logo-container {
         padding: 8px;
@@ -585,8 +612,12 @@
 </head>
 <body>
   <div class="logo-container">
-    <img class="logo logo-centered" src="logo.svg" alt="Jorobean Logo" />
-    <img class="logo logo-corner" src="logo2.svg" alt="Jorobean Logo Corner" />
+    <a href="#" class="logo logo-centered">
+      <img src="logo.svg" alt="Jorobean Logo" style="width: 100%; height: auto;" />
+    </a>
+    <a href="#" class="logo logo-corner">
+      <img src="logo2.svg" alt="Jorobean Logo Corner" style="width: 100%; height: auto;" />
+    </a>
   </div>
   <div style="height:0.5vh;"></div>
   <div class="content-wrapper">
@@ -785,10 +816,14 @@
       form.classList.add("expanded");
       starterInput.value = "";
       nameInput.focus();
-      // Hide content wrapper when form expands
+      // Hide content wrapper when form expands on non-mobile or when virtual keyboard is open
       const contentWrapper = document.querySelector('.content-wrapper');
       if (contentWrapper) {
-        contentWrapper.style.display = 'none';
+        if (window.innerHeight < 500 || window.innerWidth > 600) {
+          contentWrapper.style.display = 'none';
+        } else {
+          contentWrapper.style.opacity = '0.3';
+        }
       }
       // Show corner logo
       document.body.classList.add('scrolled');
@@ -862,11 +897,15 @@
         // Fade in content wrapper together, faster
         const contentWrapper = document.querySelector('.content-wrapper');
         if (contentWrapper) {
-          contentWrapper.style.opacity = 0;
-          contentWrapper.style.display = '';
-          setTimeout(() => {
+          if (contentWrapper.style.display === 'none') {
+            contentWrapper.style.opacity = 0;
+            contentWrapper.style.display = '';
+            setTimeout(() => {
+              contentWrapper.style.opacity = 1;
+            }, 10);
+          } else {
             contentWrapper.style.opacity = 1;
-          }, 10);
+          }
         }
         // Restore Stay Updated text in starterInput and restart typing animation
         starterInput.value = '';
