@@ -56,43 +56,80 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
       text-align: center;
       position: relative;
       overflow-x: hidden;
+      min-height: 100vh;
       padding-top: 80px; /* add padding so content doesn't hide under logo */
     }
 
-    img.logo {
-      max-width: 520px;
-      width: 100%;
-      height: auto;
+    .logo-container {
       position: fixed;
       top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 10px;
+    }
+
+    .logo {
+      position: absolute;
+      height: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+    }
+
+    .logo-centered {
+      max-width: 520px;
+      width: 100%;
       left: 50%;
       transform: translateX(-50%);
-      margin-top: 0;
-      z-index: 100;
-      padding-top: 10px;
-      padding-bottom: 6px;
-      box-shadow: none;
-      transition: box-shadow 0.2s;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .logo-corner {
+      width: 120px;
+      left: 16px;
+      top: 16px;
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    body.scrolled .logo-centered {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    body.scrolled .logo-corner {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    form.expanded ~ .logo-container .logo-centered {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    form.expanded ~ .logo-container .logo-corner {
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     .content-wrapper {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -60%);
+      flex: 1 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      opacity: 0;
-      transition: opacity 0.35s cubic-bezier(.4,0,.2,1);
-      animation: fadeIn 1s ease forwards;
-      animation-delay: 0.45s;
-      z-index: 50;
+      justify-content: center;
+      padding: 32px;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.3s ease-out;
+      position: relative; /* For proper stacking */
+      z-index: 1;
     }
 
     .silhouette-container {
@@ -450,19 +487,18 @@
     }
 
     footer {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100vw;
+      flex-shrink: 0;
+      width: 100%;
       font-size: 0.8rem;
       color: #555;
       text-align: center;
       user-select: none;
-      background: none;
+      background: #e1e1e1;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 16px 0;
+      min-height: 180px;
     }
 
     @keyframes fadeIn {
@@ -486,16 +522,17 @@
         margin-top: 6px;
         margin-bottom: 6px;
       }
-      img.logo {
+      .logo-container {
+        padding: 8px;
+      }
+      .logo-centered {
         max-width: 96vw;
-        padding-top: 2px;
-        padding-bottom: 2px;
-        position: fixed !important;
-        top: 0 !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        margin-top: 0 !important;
-        z-index: 100 !important;
+        padding: 2px;
+      }
+      .logo-corner {
+        width: 80px;
+        left: 8px;
+        top: 8px;
       }
       body {
         padding-top: 18px;
@@ -547,7 +584,10 @@
   </style>
 </head>
 <body>
-  <img class="logo" src="logo.svg" alt="Jorobean Logo" style="position:absolute;top:2px;left:50%;transform:translateX(-50%);margin-top:0;z-index:10;" />
+  <div class="logo-container">
+    <img class="logo logo-centered" src="logo.svg" alt="Jorobean Logo" />
+    <img class="logo logo-corner" src="logo2.svg" alt="Jorobean Logo Corner" />
+  </div>
   <div style="height:0.5vh;"></div>
   <div class="content-wrapper">
     <div class="silhouette-container">
@@ -750,6 +790,8 @@
       if (contentWrapper) {
         contentWrapper.style.display = 'none';
       }
+      // Show corner logo
+      document.body.classList.add('scrolled');
     });
 
     form.addEventListener("submit", async (e) => {
@@ -787,6 +829,10 @@
         const contentWrapper = document.querySelector('.content-wrapper');
         if (contentWrapper) {
           contentWrapper.style.display = '';
+        }
+        // Switch back to centered logo only if we're at the top of the page
+        if (window.scrollY <= 25) {
+          document.body.classList.remove('scrolled');
         }
 
         starterInput.value = "Thank You";
@@ -829,6 +875,10 @@
         charIndex = 0;
         isDeleting = false;
         type();
+        // Switch back to centered logo only if we're at the top of the page
+        if (window.scrollY <= 25) {
+          document.body.classList.remove('scrolled');
+        }
       }
       document.addEventListener('mousedown', function(e) {
         if (form.classList.contains('expanded')) {
@@ -1120,6 +1170,64 @@
       if (form) {
         observer.observe(form, { attributes: true, attributeFilter: ['class'] });
       }
+    })();
+  </script>
+
+  <!-- Logo scroll effect -->
+  <script>
+    (function() {
+      let lastScrollPosition = 0;
+      const scrollThreshold = 25; // Reduced threshold to 25px
+
+      function handleScroll() {
+        const currentScroll = window.scrollY;
+        const notifyForm = document.getElementById('notifyForm');
+        
+        // Only change logo state if form is not expanded
+        if (!notifyForm.classList.contains('expanded')) {
+          if (currentScroll > scrollThreshold && lastScrollPosition <= scrollThreshold) {
+            // Scrolling down past threshold
+            document.body.classList.add('scrolled');
+          } else if (currentScroll <= scrollThreshold && lastScrollPosition > scrollThreshold) {
+            // Scrolling up past threshold
+            document.body.classList.remove('scrolled');
+          }
+        }
+        
+        lastScrollPosition = currentScroll;
+      }
+
+      // Add scroll event listener with debounce for better performance
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        if (scrollTimeout) {
+          window.cancelAnimationFrame(scrollTimeout);
+        }
+        scrollTimeout = window.requestAnimationFrame(() => {
+          handleScroll();
+        });
+      });
+
+      // Form expansion handler
+      const form = document.getElementById('notifyForm');
+      if (form) {
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+              if (mutation.target.classList.contains('expanded')) {
+                document.body.classList.add('scrolled');
+              } else if (!window.scrollY) {
+                document.body.classList.remove('scrolled');
+              }
+            }
+          });
+        });
+
+        observer.observe(form, { attributes: true, attributeFilter: ['class'] });
+      }
+
+      // Initial check
+      handleScroll();
     })();
   </script>
 </body>
